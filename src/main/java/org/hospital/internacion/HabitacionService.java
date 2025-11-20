@@ -11,16 +11,26 @@ import org.hospital.exception.DataAccessException;
  */
 public class HabitacionService {
     private static final Logger logger = Logger.getLogger(HabitacionService.class.getName());
+
     private final HabitacionDao habitacionDao;
     private final SectorDao sectorDao;
+    private final CamaDao camaDao;   // <<< NUEVO
 
-    public HabitacionService(HabitacionDao habitacionDao, SectorDao sectorDao) {
+    // Constructor principal: inyección de DAOs
+    public HabitacionService(HabitacionDao habitacionDao, SectorDao sectorDao, CamaDao camaDao) {
         this.habitacionDao = habitacionDao;
         this.sectorDao = sectorDao;
+        this.camaDao = camaDao;
     }
 
+    // Constructor antiguo (se mantiene) por compatibilidad
+    public HabitacionService(HabitacionDao habitacionDao, SectorDao sectorDao) {
+        this(habitacionDao, sectorDao, new CamaDaoImpl());
+    }
+
+    // Constructor por defecto usado por los controllers
     public HabitacionService() {
-        this(new HabitacionDaoImpl(), new SectorDaoImpl());
+        this(new HabitacionDaoImpl(), new SectorDaoImpl(), new CamaDaoImpl());
     }
 
     /**
@@ -41,7 +51,7 @@ public class HabitacionService {
     }
 
     /**
-     * Find a habitacion by ID.
+     * Find habitacion by ID.
      */
     public Optional<Habitacion> findHabitacion(int nroHabitacion) throws DataAccessException {
         logger.fine("Service: Finding habitacion by ID: " + nroHabitacion);
@@ -93,8 +103,8 @@ public class HabitacionService {
     public boolean deleteHabitacion(int nroHabitacion) throws DataAccessException {
         logger.info("Service: Deleting habitacion with ID: " + nroHabitacion);
         
-        // Business logic: Check if habitacion has camas or active internaciones
-        // This would be caught by FK constraint or could be checked explicitly
+        // Regla de negocio: si hay camas/historial, la FK lo va a frenar
+        // (o podríamos hacer chequeos previos si quisiéramos)
         
         return habitacionDao.delete(nroHabitacion);
     }
@@ -122,12 +132,38 @@ public class HabitacionService {
         // Validate orientacion is one of the cardinal directions or combinations
         String orientacion = habitacion.getOrientacion().toUpperCase();
         if (!orientacion.matches("^(N|S|E|O|W|NE|NO|NW|SE|SO|SW|NORTE|SUR|ESTE|OESTE)$")) {
-            throw new IllegalArgumentException("Orientacion must be a valid direction (N, S, E, O, NE, NO, SE, SO, etc.)");
+            throw new IllegalArgumentException(
+                "Orientacion must be a valid direction (N, S, E, O, NE, NO, SE, SO, etc.)"
+            );
         }
         
         if (habitacion.getIdSector() <= 0) {
             throw new IllegalArgumentException("ID Sector must be positive");
         }
     }
+
+    /* ==================== CAMAS ==================== */
+
+    /**
+     * Devuelve las camas de una habitación.
+     */
+    public List<Cama> getCamasByHabitacion(int nroHabitacion) throws DataAccessException {
+        return camaDao.findByHabitacion(nroHabitacion);
+    }
+
+    /**
+     * Agrega una cama a una habitación (usa SP sp_agregar_cama).
+     */
+    public void agregarCama(int nroHabitacion, int nroCama) throws DataAccessException {
+        camaDao.agregarCama(nroHabitacion, nroCama);
+    }
+
+    /**
+     * Elimina o desactiva una cama según su historial (usa SP sp_eliminar_o_desactivar_cama).
+     */
+    public void eliminarODesactivarCama(int nroHabitacion, int nroCama) throws DataAccessException {
+        camaDao.eliminarODesactivarCama(nroHabitacion, nroCama);
+    }
 }
+
 

@@ -20,5 +20,10 @@ public interface CamaDao {
     Cama update(Cama cama) throws DataAccessException;
     
     boolean delete(int nroCama, int nroHabitacion) throws DataAccessException;
+
+    void agregarCama(int nroHabitacion, int nroCama) throws DataAccessException;
+
+    void eliminarODesactivarCama(int nroHabitacion, int nroCama) throws DataAccessException;
+
 }
 
