@@ -11,17 +11,17 @@ CREATE OR REPLACE PROCEDURE sp_auditoria_guardias (
 ) AS
 BEGIN
     OPEN p_resultado FOR
-        SELECT  id_auditoria,
-                fecha_hora_reg,
-                usuario_bd,
-                operacion,
-                nro_guardia,
-                fecha_hora_guard,
-                matricula,
+        SELECT  id_auditoria,       -- ID de la auditoría
+                fecha_hora_reg,     -- Fecha y hora del registro de auditoría (trigger)
+                usuario_bd,         -- Usuario de la base de datos que realizó un cambio sobre GUARDIA  
+                operacion,          -- Tipo de operación que disparo el trigger: INSERT, UPDATE, DELETE
+                nro_guardia,        -- Número de guardia afectada
+                fecha_hora_guard,   -- Fecha y hora de la guardia afectada
+                matricula,      
                 cod_especialidad,
                 id_turno,
-                detalle_old,
-                detalle_new
+                detalle_old,        -- Detalle de los valores anteriores (antes del cambio)
+                detalle_new         -- Detalle de los nuevos valores (después del cambio)
         FROM    AUDITORIA_GUARDIA
         WHERE   (p_usuario IS NULL OR usuario_bd = p_usuario)       -- Si el parámetro viene NULL, NO filtro por ese atributo
         AND     (p_desde  IS NULL OR fecha_hora_reg >= p_desde)     -- Si viene con un valor, SÍ filtro por ese atributo
