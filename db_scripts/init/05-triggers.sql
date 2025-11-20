@@ -154,3 +154,45 @@ EXCEPTION
 END;
 /
 
+-- =============================================================================
+-- 4. Chequeo: no permitir borrar habitación si tiene camas ocupadas o historial
+-- =============================================================================
+
+CREATE OR REPLACE TRIGGER tr_habitacion_no_delete_if_used
+BEFORE DELETE ON HABITACION
+FOR EACH ROW
+DECLARE
+    v_internaciones_activas NUMBER;
+    v_historial             NUMBER;
+BEGIN
+    -- 1) Si hay internaciones ACTIVAS en esa habitacion, no se puede borrar
+    --    (equivalente a "tiene camas ocupadas", pero sin tocar la tabla CAMA)
+    SELECT COUNT(*)
+    INTO v_internaciones_activas
+    FROM SE_UBICA su
+    JOIN INTERNACION i
+        ON i.nro_internacion = su.nro_internacion
+    WHERE su.nro_habitacion = :OLD.nro_habitacion   AND i.fecha_fin IS NULL;
+
+    IF v_internaciones_activas > 0 THEN
+        RAISE_APPLICATION_ERROR(
+            -20040,
+            'No se puede eliminar la habitacion ' || :OLD.nro_habitacion ||
+            ' porque tiene camas OCUPADAS (internaciones activas).'
+        );
+    END IF;
+
+    -- 2) Si tiene historial en SE_UBICA, tampoco se puede borrar
+    SELECT COUNT(*)
+    INTO v_historial
+    FROM SE_UBICA su
+    WHERE su.nro_habitacion = :OLD.nro_habitacion;
+
+    IF v_historial > 0 THEN
+        RAISE_APPLICATION_ERROR(
+            -20041,
+            'No se puede eliminar la habitacion ' || :OLD.nro_habitacion || ' porque tiene historial de uso (SE_UBICA).'
+        );
+    END IF;
+END;
+/

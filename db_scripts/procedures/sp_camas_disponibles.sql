@@ -53,11 +53,16 @@ END;
 
 CREATE OR REPLACE PROCEDURE sp_agregar_cama (
         p_nro_habitacion IN  HABITACION.nro_habitacion%TYPE,
-        p_nro_cama       OUT CAMA.nro_cama%TYPE
+        p_nro_cama       IN OUT CAMA.nro_cama%TYPE
 ) AS
         v_count    NUMBER;
         v_nro_cama CAMA.nro_cama%TYPE;
 BEGIN
+        -- 0) Normalizamos: si viene 0 o negativo, lo tratamos como NULL
+        IF p_nro_cama <= 0 THEN
+                p_nro_cama := NULL;
+        END IF;
+
         -- 1) Verificamos que la habitación exista
         SELECT COUNT(*)
         INTO   v_count
@@ -71,18 +76,38 @@ BEGIN
                 );
         END IF;
 
-        -- 2) Calculamos el número de la cama siguiente dentro de esa habitación
-        SELECT NVL(MAX(nro_cama) + 1, 1)
-        INTO   v_nro_cama
-        FROM   CAMA
-        WHERE  nro_habitacion = p_nro_habitacion;
+        -- 2) Decidimos el número de cama
+        IF p_nro_cama IS NOT NULL THEN
+                -- Caso A: el usuario pidió un número específico
+
+                -- 2.a) Verificamos que no exista ya esa cama en esa habitación
+                SELECT COUNT(*)
+                INTO   v_count
+                FROM   CAMA
+                WHERE  nro_habitacion = p_nro_habitacion
+                AND    nro_cama       = p_nro_cama;
+
+                IF v_count > 0 THEN
+                        RAISE_APPLICATION_ERROR(
+                        -20032,
+                        'La cama ' || p_nro_cama || ' ya existe en la habitación ' || p_nro_habitacion || '.'
+                        );
+                END IF;
+
+                v_nro_cama := p_nro_cama;
+        ELSE
+                -- Caso B: campo vacío: asignar siguiente número
+                SELECT NVL(MAX(nro_cama) + 1, 1)
+                INTO   v_nro_cama
+                FROM   CAMA
+                WHERE  nro_habitacion = p_nro_habitacion;
+
+                p_nro_cama := v_nro_cama;  -- devolvemos el número generado
+        END IF;
 
         -- 3) Insertamos la cama nueva como LIBRE
         INSERT INTO CAMA (nro_habitacion, nro_cama, estado)
         VALUES (p_nro_habitacion, v_nro_cama, 'LIBRE');
-
-        -- 4) Devolvemos el número de cama asignado
-        p_nro_cama := v_nro_cama;
 END;
 /
 

@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
 import java.sql.CallableStatement;
+import java.sql.Types;
 
 import org.hospital.config.DatabaseConfig;
 import org.hospital.exception.DataAccessException;
@@ -414,9 +415,26 @@ public class CamaDaoImpl implements CamaDao {
             connection.setAutoCommit(false);
 
             try (CallableStatement stmt = connection.prepareCall(sql)) {
+                // 1) Habitacion (IN)
                 stmt.setInt(1, nroHabitacion);
-                stmt.setInt(2, nroCama);
+
+                // 2) Cama (IN OUT)
+                //    Si nroCama <= 0 lo tratamos como "campo vacío"
+                if (nroCama <= 0) {
+                    stmt.setNull(2, Types.INTEGER);
+                } else {
+                    stmt.setInt(2, nroCama);
+                }
+
+                // Registramos OUT para leer el número final asignado
+                stmt.registerOutParameter(2, Types.INTEGER);
+
+                // Ejecutamos la SP
                 stmt.execute();
+
+                // Obtenemos el número de cama definitivo (sea el ingresado o el auto)
+                int camaAsignada = stmt.getInt(2);
+                nroCama = camaAsignada;
             }
 
             connection.commit();
