@@ -46,3 +46,97 @@ BEGIN
                     c.nro_cama;
 END;
 /
+
+-- =========================================================
+-- 3. Insercion: agregar una nueva cama a una habitación
+-- =========================================================
+
+CREATE OR REPLACE PROCEDURE sp_agregar_cama (
+        p_nro_habitacion IN  HABITACION.nro_habitacion%TYPE,
+        p_nro_cama       OUT CAMA.nro_cama%TYPE
+) AS
+        v_count    NUMBER;
+        v_nro_cama CAMA.nro_cama%TYPE;
+BEGIN
+        -- 1) Verificamos que la habitación exista
+        SELECT COUNT(*)
+        INTO   v_count
+        FROM   HABITACION
+        WHERE  nro_habitacion = p_nro_habitacion;
+
+        IF v_count = 0 THEN
+                RAISE_APPLICATION_ERROR(
+                -20030,
+                'La habitación ' || p_nro_habitacion || ' no existe.'
+                );
+        END IF;
+
+        -- 2) Calculamos el número de la cama siguiente dentro de esa habitación
+        SELECT NVL(MAX(nro_cama) + 1, 1)
+        INTO   v_nro_cama
+        FROM   CAMA
+        WHERE  nro_habitacion = p_nro_habitacion;
+
+        -- 3) Insertamos la cama nueva como LIBRE
+        INSERT INTO CAMA (nro_habitacion, nro_cama, estado)
+        VALUES (p_nro_habitacion, v_nro_cama, 'LIBRE');
+
+        -- 4) Devolvemos el número de cama asignado
+        p_nro_cama := v_nro_cama;
+END;
+/
+
+-- =========================================================
+-- 4. Eliminacion: eliminar o desactivar una cama
+-- =========================================================
+
+CREATE OR REPLACE PROCEDURE sp_eliminar_o_desactivar_cama (
+        p_nro_habitacion IN CAMA.nro_habitacion%TYPE,
+        p_nro_cama       IN CAMA.nro_cama%TYPE
+) AS
+        v_estado   CAMA.estado%TYPE;
+        v_count    NUMBER;
+BEGIN
+        -- 1) Verificar que la cama exista y obtener su estado
+        SELECT estado
+        INTO   v_estado
+        FROM   CAMA
+        WHERE  nro_habitacion = p_nro_habitacion
+        AND  nro_cama       = p_nro_cama;
+
+        -- 2) Solo se pueden eliminar camas LIBRES
+        IF v_estado <> 'LIBRE' THEN
+                RAISE_APPLICATION_ERROR(
+                -20031,
+                'Solo se pueden eliminar o desactivar camas en estado LIBRE.'
+                );
+        END IF;
+
+        -- 3) Verificamos si tiene historial en SE_UBICA
+        SELECT COUNT(*)
+        INTO   v_count
+        FROM   SE_UBICA
+        WHERE  nro_habitacion = p_nro_habitacion
+        AND  nro_cama       = p_nro_cama;
+
+        IF v_count = 0 THEN
+                -- Caso A: nunca se usó: se puede eliminar físicamente
+                DELETE FROM CAMA
+                WHERE nro_habitacion = p_nro_habitacion
+                AND nro_cama       = p_nro_cama;
+        ELSE
+                -- Caso B: tiene historial: la marcamos FUERA_DE_SERVICIO
+                UPDATE CAMA
+                SET estado = 'FUERA_DE_SERVICIO'
+                WHERE nro_habitacion = p_nro_habitacion
+                AND nro_cama       = p_nro_cama;
+        END IF;
+
+EXCEPTION
+        WHEN NO_DATA_FOUND THEN
+                RAISE_APPLICATION_ERROR(
+                -20030,
+                'La cama indicada no existe en esa habitación.'
+                );
+END;
+/
