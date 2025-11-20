@@ -121,6 +121,50 @@ public class InternacionDaoImpl implements InternacionDao {
         }
     }
 
+    @Override
+    public void changeBed(int nroInternacion, int nroHabitacion, int nroCama) throws DataAccessException {
+        logger.info("Changing bed via sp_cambiar_cama_internacion: nro_internacion=" +
+                nroInternacion + ", hab=" + nroHabitacion + ", cama=" + nroCama);
+
+        Connection connection = null;
+        try {
+            connection = DatabaseConfig.getConnection();
+            connection.setAutoCommit(false);
+
+            // p_fecha_ingreso tiene DEFAULT SYSTIMESTAMP, así que usamos solo 3 params
+            String call = "{ call sp_cambiar_cama_internacion(?, ?, ?) }";
+
+            try (CallableStatement stmt = connection.prepareCall(call)) {
+                stmt.setInt(1, nroInternacion);
+                stmt.setInt(2, nroHabitacion);
+                stmt.setInt(3, nroCama);
+                stmt.execute();
+            }
+
+            connection.commit();
+            logger.info("Bed changed successfully for internacion: " + nroInternacion);
+
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                    logger.warning("Transaction rolled back for bed change of internacion " + nroInternacion);
+                } catch (SQLException ex) {
+                    logger.severe("Failed to rollback transaction: " + ex.getMessage());
+                }
+            }
+            throw new DataAccessException("Error changing bed via stored procedure", e);
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.setAutoCommit(true);
+                    connection.close();
+                } catch (SQLException e) {
+                    logger.warning("Failed to close connection: " + e.getMessage());
+                }
+            }
+        }
+    }
 
     @Override
     public Optional<Internacion> findById(int nroInternacion) throws DataAccessException {

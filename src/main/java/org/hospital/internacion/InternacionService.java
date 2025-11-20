@@ -250,5 +250,21 @@ public class InternacionService {
             throw new IllegalArgumentException("Matricula must be positive");
         }
     }
+
+    public void changeBed(int nroInternacion, Integer nroHabitacion, Integer nroCama) throws DataAccessException {
+        if (nroHabitacion == null || nroCama == null) {
+            // Nada que hacer
+            return;
+        }
+
+        // Opcional: verificar que la internación exista
+        if (!internacionDao.findById(nroInternacion).isPresent()) {
+            throw new IllegalArgumentException("Internacion not found: " + nroInternacion);
+        }
+
+        internacionDao.changeBed(nroInternacion, nroHabitacion, nroCama);
+    }
+
+
 }
 
