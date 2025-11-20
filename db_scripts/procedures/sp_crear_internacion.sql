@@ -2,6 +2,7 @@
 -- =============================================================================
 -- 1. Internacion: crear Internación con asignación automática de cama
 -- =============================================================================
+
 CREATE OR REPLACE PROCEDURE sp_crear_internacion (
     p_tipo_documento  IN INTERNACION.tipo_documento%TYPE,
     p_nro_documento   IN INTERNACION.nro_documento%TYPE,
@@ -98,5 +99,80 @@ EXCEPTION
                 'No hay camas libres disponibles para asignar la internación.'
             );
         END IF;
+END;
+/
+
+-- =============================================================================
+-- 2. Internacion: cambiar cama de una internación activa
+-- =============================================================================
+
+CREATE OR REPLACE PROCEDURE sp_cambiar_cama_internacion (
+    p_nro_internacion IN INTERNACION.nro_internacion%TYPE,
+    p_nro_habitacion  IN CAMA.nro_habitacion%TYPE,
+    p_nro_cama        IN CAMA.nro_cama%TYPE,
+    p_fecha_ingreso   IN SE_UBICA.fecha_hora_ingreso%TYPE DEFAULT SYSTIMESTAMP
+) AS
+    v_fecha_inicio   INTERNACION.fecha_inicio%TYPE;
+    v_fecha_fin      INTERNACION.fecha_fin%TYPE;
+    v_old_cama       CAMA.nro_cama%TYPE;
+    v_old_habitacion CAMA.nro_habitacion%TYPE;
+BEGIN
+    -- 1) Verificamos que la internacion exista y este abierta
+    SELECT fecha_inicio, fecha_fin
+    INTO   v_fecha_inicio, v_fecha_fin
+    FROM   INTERNACION
+    WHERE  nro_internacion = p_nro_internacion;
+
+    IF v_fecha_fin IS NOT NULL THEN
+        RAISE_APPLICATION_ERROR(
+            -20010,
+            'No se puede cambiar la cama de una internacion ya finalizada.'
+        );
+    END IF;
+
+    -- 2) Obtenemos la ultima ubicacion registrada
+    SELECT su.nro_cama, su.nro_habitacion
+    INTO   v_old_cama, v_old_habitacion
+    FROM   SE_UBICA su
+    WHERE  su.nro_internacion = p_nro_internacion
+    ORDER BY su.fecha_hora_ingreso DESC
+    FETCH FIRST 1 ROW ONLY;
+
+    -- Si la cama nueva es la misma, no hacemos nada
+    IF v_old_cama = p_nro_cama  AND v_old_habitacion = p_nro_habitacion THEN
+        RETURN;
+    END IF;
+
+    -- 3) Liberar la cama anterior
+    UPDATE CAMA
+        SET estado = 'LIBRE'
+    WHERE nro_cama       = v_old_cama   AND nro_habitacion = v_old_habitacion;
+
+    /*
+    4) Insertar nueva ubicacion
+        El trigger tr_se_ubica_cama_estado:
+            - verificara que la nueva cama este LIBRE
+            - verificara que la fecha este dentro de la internacion
+            - marcara la nueva cama como OCUPADA
+    */
+    INSERT INTO SE_UBICA (
+        nro_internacion,
+        fecha_hora_ingreso,
+        nro_cama,
+        nro_habitacion
+    ) VALUES (
+        p_nro_internacion,
+        p_fecha_ingreso,
+        p_nro_cama,
+        p_nro_habitacion
+    );
+
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        -- No hay ubicaciones para esa internacion
+        RAISE_APPLICATION_ERROR(
+            -20011,
+            'No se puede cambiar la cama: la internacion no tiene ubicaciones registradas.'
+        );
 END;
 /
