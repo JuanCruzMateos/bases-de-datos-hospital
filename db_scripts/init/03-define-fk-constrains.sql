@@ -53,7 +53,7 @@ ALTER TABLE CAMA ADD (
         REFERENCES HABITACION (nro_habitacion)
         ON DELETE CASCADE,
     CONSTRAINT chk_cama_estado
-        CHECK (estado IN ('LIBRE', 'OCUPADA')),
+        CHECK (estado IN ('LIBRE', 'OCUPADA', 'FUERA_DE_SERVICIO')), --'FUERA_DE_SERVICIO' para bajas con historial en SE_UBICA
     CONSTRAINT chk_cama_nro_cama
         CHECK (nro_cama > 0),
     CONSTRAINT chk_cama_nro_habitacion
@@ -107,10 +107,6 @@ ALTER TABLE SE_UBICA ADD (
     CONSTRAINT fk_se_ubica_internacion
         FOREIGN KEY (nro_internacion)
         REFERENCES INTERNACION (nro_internacion)
-        ON DELETE CASCADE,
-    CONSTRAINT fk_se_ubica_cama
-        FOREIGN KEY (nro_cama, nro_habitacion)
-        REFERENCES CAMA (nro_cama, nro_habitacion)
         ON DELETE CASCADE
 );
 
