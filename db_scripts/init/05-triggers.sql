@@ -148,6 +148,6 @@ BEGIN
         AND nro_habitacion = v_nro_habitacion;
 EXCEPTION
     WHEN NO_DATA_FOUND THEN
-        NULL; -- Por si hubiera alguna internación sin SE_UBICA (raro, pero mejor no romper)
+        NULL; -- Por si hay alguna internación sin SE_UBICA asociada
 END;
 /
