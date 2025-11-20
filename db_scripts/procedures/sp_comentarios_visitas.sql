@@ -1,3 +1,5 @@
+ALTER SESSION SET CONTAINER = FREEPDB1;
+ALTER SESSION SET CURRENT_SCHEMA = hospital;
 
 -- =========================================================
 -- 1. Internaciones: lista de internaciones de un paciente

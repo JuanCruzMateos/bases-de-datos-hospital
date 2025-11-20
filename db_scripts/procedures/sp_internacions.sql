@@ -1,3 +1,5 @@
+ALTER SESSION SET CONTAINER = FREEPDB1;
+ALTER SESSION SET CURRENT_SCHEMA = hospital;
 
 -- =============================================================================
 -- 1. Internacion: crear Internación con asignación automática de cama
