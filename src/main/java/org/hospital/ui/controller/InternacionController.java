@@ -66,27 +66,59 @@ public class InternacionController extends BaseController {
             
             if (!validateInputs()) return;
             
+            // 1) Fechas
             LocalDate fechaInicio = LocalDate.parse(view.getFechaInicio());
             LocalDate fechaFin = null;
             if (!view.isActiva() && !view.getFechaFin().isEmpty()) {
                 fechaFin = LocalDate.parse(view.getFechaFin());
             }
+
+            // 2) Matrícula (obligatoria)
             long matricula = Long.parseLong(view.getMatricula());
-            
+
+            // 3) Habitación / Cama (opcionales)
+            Integer nroHabitacion = null;
+            Integer nroCama = null;
+            String habText = view.getNroHabitacion();
+            String camaText = view.getNroCama();
+
+            // Caso A: alguno de los dos vino informado, pero no ambos: error
+            if ((!habText.isEmpty() && camaText.isEmpty()) ||
+                (habText.isEmpty() && !camaText.isEmpty())) {
+                showError("Si indica Nro Habitación debe indicar también Nro Cama (y viceversa).");
+                return;
+            }
+
+            // Caso B: ambos vienen completo: parsear a Integer
+            if (!habText.isEmpty() && !camaText.isEmpty()) {
+                nroHabitacion = Integer.valueOf(habText);
+                nroCama = Integer.valueOf(camaText);
+            }
+            // Caso C: ambos vacíos: se quedan en null, la BD elegirá cama libre
+
+            // 4) Armar objeto de dominio
             Internacion internacion = new Internacion(
-                0, fechaInicio, fechaFin,
-                view.getTipoDocumento(), view.getNroDocumento(), matricula
+                0,                      // nro_internacion lo genera la BD
+                fechaInicio,
+                fechaFin,
+                view.getTipoDocumento(),
+                view.getNroDocumento(),
+                matricula
             );
-            
-            service.createInternacion(internacion);
+
+            // 5) Llamar al service con cama/habitación opcionales
+            // (lo vamos a implementar en InternacionService)
+            service.createInternacion(internacion, nroHabitacion, nroCama);
+
             showSuccess("Internación created successfully!");
             view.clearForm();
             loadInternaciones();
-            
+
         } catch (DateTimeParseException e) {
             showError("Invalid date format. Use YYYY-MM-DD");
         } catch (NumberFormatException e) {
-            showError("Invalid matricula format");
+            // Ahora puede fallar matrícula, habitación o cama
+            showError("Formato numérico inválido en Matrícula / Nro Habitación / Nro Cama");
         } catch (IllegalArgumentException e) {
             showError("Validation error: " + e.getMessage());
         } catch (DataAccessException e) {
@@ -95,7 +127,7 @@ public class InternacionController extends BaseController {
             handleException(e);
         }
     }
-    
+
     private void updateInternacion() {
         try {
             logger.info("User initiating update internacion");

@@ -22,7 +22,7 @@ public class InternacionService {
     private final CamaService camaService;
 
     public InternacionService(InternacionDao internacionDao, PacienteDao pacienteDao, 
-                             MedicoDao medicoDao, CamaService camaService) {
+                            MedicoDao medicoDao, CamaService camaService) {
         this.internacionDao = internacionDao;
         this.pacienteDao = pacienteDao;
         this.medicoDao = medicoDao;
@@ -33,39 +33,46 @@ public class InternacionService {
         this(new InternacionDaoImpl(), new PacienteDaoImpl(), new MedicoDaoImpl(), new CamaService());
     }
 
-    /**
-     * Create a new internacion with business logic validation.
-     */
+    // Versión vieja: delega a la nueva con cama/habitación null
     public Internacion createInternacion(Internacion internacion) throws DataAccessException {
-        logger.info("Service: Creating new internacion for paciente: " + 
+        return createInternacion(internacion, null, null);
+    }
+
+    // Nueva versión: permite pasar cama/habitación opcionales
+    public Internacion createInternacion(Internacion internacion,
+                                        Integer nroHabitacion,
+                                        Integer nroCama) throws DataAccessException {
+        logger.info("Service: Creating new internacion for paciente: " +
                     internacion.getTipoDocumento() + " " + internacion.getNroDocumento());
-        
+
         validateInternacionBusinessRules(internacion);
-        
+
         // Verify paciente exists
         if (!pacienteDao.findByTipoDocumentoAndNroDocumento(
                 internacion.getTipoDocumento(), internacion.getNroDocumento()).isPresent()) {
             throw new IllegalArgumentException("Paciente not found");
         }
-        
+
         // Verify medico exists
         if (!medicoDao.findByMatricula(internacion.getMatricula()).isPresent()) {
             throw new IllegalArgumentException("Medico not found with matricula: " + internacion.getMatricula());
         }
-        
+
         // Business rule: Check if paciente already has an active internacion
         List<Internacion> activeInternaciones = internacionDao.findByPaciente(
                 internacion.getTipoDocumento(), internacion.getNroDocumento());
-        
+
         for (Internacion active : activeInternaciones) {
             if (active.getFechaFin() == null) {
                 throw new IllegalArgumentException(
                     "Paciente already has an active internacion (ID: " + active.getNroInternacion() + ")");
             }
         }
-        
-        return internacionDao.create(internacion);
+
+        // AHORA usamos el nuevo método del DAO que recibe cama/habitación
+        return internacionDao.create(internacion, nroHabitacion, nroCama);
     }
+
 
     /**
      * Find an internacion by ID.
