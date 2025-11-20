@@ -22,6 +22,19 @@ ALTER TABLE MEDICO ADD (
     CONSTRAINT chk_medico_max_guardia
         CHECK (max_cant_guardia >= 0)
 );
+-- Restriccion para periodo_vacaciones: debe ser NULL (por si es nuevo) o uno de los meses del año
+ALTER TABLE MEDICO ADD (
+    CONSTRAINT chk_medico_periodo_vacaciones
+        CHECK (
+            periodo_vacaciones IS NULL
+            OR UPPER(periodo_vacaciones) IN (
+                'ENERO', 'FEBRERO', 'MARZO', 'ABRIL',
+                'MAYO', 'JUNIO', 'JULIO', 'AGOSTO',
+                'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'
+            )
+        )
+);
+
 
 ALTER TABLE HABITACION ADD (
     CONSTRAINT fk_habitacion_sector
