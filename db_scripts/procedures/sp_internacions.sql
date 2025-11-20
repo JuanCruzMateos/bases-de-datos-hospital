@@ -176,3 +176,57 @@ EXCEPTION
         );
 END;
 /
+
+-- =============================================================================
+-- 3. Listado: internaciones de un paciente
+-- =============================================================================
+
+CREATE OR REPLACE PROCEDURE sp_internaciones_paciente (
+    p_tipo_documento IN  INTERNACION.tipo_documento%TYPE,
+    p_nro_documento  IN  INTERNACION.nro_documento%TYPE,
+    p_resultado      OUT SYS_REFCURSOR
+) AS
+BEGIN
+    OPEN p_resultado FOR
+    SELECT
+        i.nro_internacion,
+        i.fecha_inicio,
+        i.fecha_fin,
+        CASE
+            WHEN i.fecha_fin IS NULL THEN 'EN CURSO'
+            ELSE 'FINALIZADA'
+        END AS estado
+    FROM INTERNACION i
+    WHERE i.tipo_documento = p_tipo_documento
+        AND i.nro_documento  = p_nro_documento
+    ORDER BY i.fecha_inicio DESC;
+END;
+/
+
+
+-- =============================================================================
+-- 4. Listado: historial de ubicaciones de una internación
+-- =============================================================================
+
+CREATE OR REPLACE PROCEDURE sp_historial_ubicaciones_internacion (
+    p_nro_internacion IN  INTERNACION.nro_internacion%TYPE,
+    p_resultado       OUT SYS_REFCURSOR
+) AS
+BEGIN
+    OPEN p_resultado FOR
+    SELECT
+        su.nro_internacion,
+        su.fecha_hora_ingreso,
+        su.nro_habitacion,
+        su.nro_cama,
+        h.piso,
+        h.orientacion,
+        s.id_sector,
+        s.descripcion AS desc_sector
+    FROM SE_UBICA su
+    JOIN HABITACION h   ON h.nro_habitacion = su.nro_habitacion
+    JOIN SECTOR s       ON s.id_sector = h.id_sector
+    WHERE su.nro_internacion = p_nro_internacion
+    ORDER BY su.fecha_hora_ingreso;
+END;
+/

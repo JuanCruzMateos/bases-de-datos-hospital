@@ -74,9 +74,9 @@ BEGIN
 END;
 /
 
--- =============================================================
--- 2. Chequeo: estado de cama al ubicar paciente en internación
--- =============================================================
+-- ========================================================================
+-- 2. Chequeo: verifica el estado de cama al ubicar paciente en internación
+-- ========================================================================
 
 CREATE OR REPLACE TRIGGER tr_se_ubica_cama_estado
 BEFORE INSERT ON SE_UBICA
