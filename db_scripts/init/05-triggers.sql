@@ -151,3 +151,4 @@ EXCEPTION
         NULL; -- Por si hay alguna internación sin SE_UBICA asociada
 END;
 /
+

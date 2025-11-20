@@ -20,17 +20,6 @@ BEGIN
 END;
 /
 
-/* Stored procedure:
-    - Lista los comentarios de las visitas médicas
-        para una internación concreta.
-    Devuelve:
-        - nro_internacion
-        - paciente (Apellido, Nombre)
-        - medico   (Apellido, Nombre)
-        - fecha_recorrido, hora_inicio, hora_fin
-        - comentario
-*/
-
 -- =============================================================================
 -- 2. Comenatrios: comentarios de visitas medicas de una internación especifica
 -- =============================================================================
