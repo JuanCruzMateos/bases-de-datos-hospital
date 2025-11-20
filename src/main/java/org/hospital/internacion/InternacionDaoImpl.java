@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
+import java.sql.CallableStatement;
 
 import org.hospital.config.DatabaseConfig;
 import org.hospital.exception.DataAccessException;
@@ -40,37 +41,64 @@ public class InternacionDaoImpl implements InternacionDao {
 
     @Override
     public Internacion create(Internacion internacion) throws DataAccessException {
-        logger.info("Creating internacion: paciente=" + internacion.getTipoDocumento() + "/" + internacion.getNroDocumento());
+        // Compatibilidad para el código viejo 
+        return create(internacion, null, null);
+    }
+
+    @Override
+    public Internacion create(Internacion internacion,
+                            Integer nroHabitacion,
+                            Integer nroCama) throws DataAccessException {
+        logger.info("Creating internacion via sp_crear_internacion: paciente=" +
+                    internacion.getTipoDocumento() + "/" + internacion.getNroDocumento());
         validateInternacion(internacion);
+
         Connection connection = null;
         try {
             connection = DatabaseConfig.getConnection();
             connection.setAutoCommit(false);
-            
-            try (PreparedStatement statement = connection.prepareStatement(INSERT_SQL, 
-                    new String[]{"nro_internacion"})) {
-                statement.setDate(1, toSqlDate(internacion.getFechaInicio()));
+
+            String call = "{ call sp_crear_internacion(?, ?, ?, ?, ?, ?, ?, ?) }";
+
+            try (CallableStatement stmt = connection.prepareCall(call)) {
+
+                // 1: tipo_documento
+                stmt.setString(1, internacion.getTipoDocumento());
+                // 2: nro_documento
+                stmt.setString(2, internacion.getNroDocumento());
+                // 3: matricula
+                stmt.setLong(3, internacion.getMatricula());
+                // 4: fecha_inicio
+                stmt.setDate(4, toSqlDate(internacion.getFechaInicio()));
+                // 5: fecha_fin
                 if (internacion.getFechaFin() != null) {
-                    statement.setDate(2, toSqlDate(internacion.getFechaFin()));
+                    stmt.setDate(5, toSqlDate(internacion.getFechaFin()));
                 } else {
-                    statement.setNull(2, Types.DATE);
+                    stmt.setNull(5, Types.DATE);
                 }
-                statement.setString(3, internacion.getTipoDocumento());
-                statement.setString(4, internacion.getNroDocumento());
-                statement.setLong(5, internacion.getMatricula());
-                statement.executeUpdate();
-                
-                // Get generated ID
-                try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
-                    if (generatedKeys.next()) {
-                        internacion.setNroInternacion(generatedKeys.getInt(1));
-                    }
+
+                // 6 y 7: nro_habitacion / nro_cama opcionales
+                if (nroHabitacion != null && nroCama != null) {
+                    stmt.setInt(6, nroHabitacion);
+                    stmt.setInt(7, nroCama);
+                } else {
+                    stmt.setNull(6, Types.INTEGER);
+                    stmt.setNull(7, Types.INTEGER);
                 }
+
+                // 8: OUT nro_internacion
+                stmt.registerOutParameter(8, Types.INTEGER);
+
+                stmt.execute();
+
+                int generatedId = stmt.getInt(8);
+                internacion.setNroInternacion(generatedId);
             }
-            
+
             connection.commit();
             logger.info("Successfully created internacion: " + internacion.getNroInternacion());
             return internacion;
+
         } catch (SQLException e) {
             if (connection != null) {
                 try {
@@ -80,11 +108,56 @@ public class InternacionDaoImpl implements InternacionDao {
                     logger.severe("Failed to rollback transaction: " + ex.getMessage());
                 }
             }
-            logger.severe("Failed to create internacion: " + e.getMessage());
-            throw new DataAccessException("Error creating internacion", e);
+            throw new DataAccessException("Error creating internacion via stored procedure", e);
         } finally {
             if (connection != null) {
                 try {
+                    connection.setAutoCommit(true);
+                    connection.close();
+                } catch (SQLException e) {
+                    logger.warning("Failed to close connection: " + e.getMessage());
+                }
+            }
+        }
+    }
+
+    @Override
+    public void changeBed(int nroInternacion, int nroHabitacion, int nroCama) throws DataAccessException {
+        logger.info("Changing bed via sp_cambiar_cama_internacion: nro_internacion=" +
+                nroInternacion + ", hab=" + nroHabitacion + ", cama=" + nroCama);
+
+        Connection connection = null;
+        try {
+            connection = DatabaseConfig.getConnection();
+            connection.setAutoCommit(false);
+
+            // p_fecha_ingreso tiene DEFAULT SYSTIMESTAMP, así que usamos solo 3 params
+            String call = "{ call sp_cambiar_cama_internacion(?, ?, ?) }";
+
+            try (CallableStatement stmt = connection.prepareCall(call)) {
+                stmt.setInt(1, nroInternacion);
+                stmt.setInt(2, nroHabitacion);
+                stmt.setInt(3, nroCama);
+                stmt.execute();
+            }
+
+            connection.commit();
+            logger.info("Bed changed successfully for internacion: " + nroInternacion);
+
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                    logger.warning("Transaction rolled back for bed change of internacion " + nroInternacion);
+                } catch (SQLException ex) {
+                    logger.severe("Failed to rollback transaction: " + ex.getMessage());
+                }
+            }
+            throw new DataAccessException("Error changing bed via stored procedure", e);
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.setAutoCommit(true);
                     connection.close();
                 } catch (SQLException e) {
                     logger.warning("Failed to close connection: " + e.getMessage());

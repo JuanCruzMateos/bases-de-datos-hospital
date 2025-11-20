@@ -22,17 +22,30 @@ ALTER TABLE MEDICO ADD (
     CONSTRAINT chk_medico_max_guardia
         CHECK (max_cant_guardia >= 0)
 );
+-- Restriccion para periodo_vacaciones: puede ser NULL (por si es nuevo) o uno de los meses del año
+ALTER TABLE MEDICO ADD (
+    CONSTRAINT chk_medico_periodo_vacaciones
+        CHECK (
+            periodo_vacaciones IS NULL
+            OR UPPER(periodo_vacaciones) IN (
+                'ENERO', 'FEBRERO', 'MARZO', 'ABRIL',
+                'MAYO', 'JUNIO', 'JULIO', 'AGOSTO',
+                'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'
+            )
+        )
+);
+
 
 ALTER TABLE HABITACION ADD (
     CONSTRAINT fk_habitacion_sector
         FOREIGN KEY (id_sector)
-        REFERENCES SECTOR (id_sector)
-        ON DELETE CASCADE,
+        REFERENCES SECTOR (id_sector),
     CONSTRAINT chk_habitacion_piso
         CHECK (piso >= 0),
     CONSTRAINT chk_habitacion_orientacion
         CHECK (orientacion IN ('NORTE', 'SUR', 'ESTE', 'OESTE'))
 );
+
 
 ALTER TABLE CAMA ADD (
     CONSTRAINT fk_cama_habitacion
@@ -40,7 +53,7 @@ ALTER TABLE CAMA ADD (
         REFERENCES HABITACION (nro_habitacion)
         ON DELETE CASCADE,
     CONSTRAINT chk_cama_estado
-        CHECK (estado IN ('LIBRE', 'OCUPADA')),
+        CHECK (estado IN ('LIBRE', 'OCUPADA', 'FUERA_DE_SERVICIO')), --'FUERA_DE_SERVICIO' para bajas con historial en SE_UBICA
     CONSTRAINT chk_cama_nro_cama
         CHECK (nro_cama > 0),
     CONSTRAINT chk_cama_nro_habitacion
@@ -94,10 +107,6 @@ ALTER TABLE SE_UBICA ADD (
     CONSTRAINT fk_se_ubica_internacion
         FOREIGN KEY (nro_internacion)
         REFERENCES INTERNACION (nro_internacion)
-        ON DELETE CASCADE,
-    CONSTRAINT fk_se_ubica_cama
-        FOREIGN KEY (nro_cama, nro_habitacion)
-        REFERENCES CAMA (nro_cama, nro_habitacion)
         ON DELETE CASCADE
 );
 

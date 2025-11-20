@@ -8,6 +8,10 @@ import org.hospital.exception.DataAccessException;
 public interface InternacionDao {
     Internacion create(Internacion internacion) throws DataAccessException;
 
+    Internacion create(Internacion internacion, Integer nroHabitacion, Integer nroCama) throws DataAccessException;
+
+    void changeBed(int nroInternacion, int nroHabitacion, int nroCama) throws DataAccessException;
+
     Optional<Internacion> findById(int nroInternacion) throws DataAccessException;
 
     List<Internacion> findAll() throws DataAccessException;

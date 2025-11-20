@@ -5,6 +5,8 @@ import org.hospital.exception.DataAccessException;
 import org.hospital.internacion.Habitacion;
 import org.hospital.internacion.HabitacionService;
 import org.hospital.ui.view.HabitacionPanel;
+import org.hospital.internacion.Cama;
+
 
 /**
  * Controller for Habitacion (Room) operations.
@@ -22,25 +24,43 @@ public class HabitacionController extends BaseController {
     }
     
     private void initController() {
+        // Botones de HABITACION (lo que ya tenías)
         view.getBtnCreate().addActionListener(e -> createHabitacion());
         view.getBtnUpdate().addActionListener(e -> updateHabitacion());
         view.getBtnDelete().addActionListener(e -> deleteHabitacion());
         view.getBtnRefresh().addActionListener(e -> loadHabitaciones());
-        view.getBtnClear().addActionListener(e -> view.clearForm());
+        view.getBtnClear().addActionListener(e -> {
+            view.clearForm();
+            // opcional: también vaciar tabla de camas
+            view.updateCamasTable(java.util.Collections.emptyList());
+            view.setNroCama("");
+        });
+
+        // NUEVO: botones de CAMAS
+        view.getBtnAddCama().addActionListener(e -> addCama());
+        view.getBtnDeleteCama().addActionListener(e -> deleteCama());
         
+        // Cuando seleccionás una habitación, cargamos form + camas
         view.getTable().getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
                 view.loadSelectedToForm();
+                loadCamasForSelectedHabitacion();   // <--- método nuevo
             }
         });
     }
     
+    /* ==================== HABITACIONES ==================== */
+
     private void loadHabitaciones() {
         try {
             logger.info("Loading all habitaciones");
             List<Habitacion> habitaciones = service.getAllHabitaciones();
             view.updateTable(habitaciones);
             logger.fine("Loaded " + habitaciones.size() + " habitaciones");
+
+            // si no hay selección, limpiamos camas
+            view.updateCamasTable(java.util.Collections.emptyList());
+            view.setNroCama("");
         } catch (DataAccessException e) {
             handleDataAccessException(e);
         }
@@ -55,7 +75,9 @@ public class HabitacionController extends BaseController {
             int piso = Integer.parseInt(view.getPiso());
             int idSector = Integer.parseInt(view.getIdSector());
             
+            // Para alta: nroHabitacion = 0, lo genera la BD
             Habitacion habitacion = new Habitacion(0, piso, view.getOrientacion(), idSector);
+
             service.createHabitacion(habitacion);
             showSuccess("Habitación created successfully!");
             view.clearForm();
@@ -71,18 +93,24 @@ public class HabitacionController extends BaseController {
             handleException(e);
         }
     }
-    
+
     private void updateHabitacion() {
         try {
             logger.info("User initiating update habitacion");
             
             if (view.getNroHabitacion().isEmpty() || !validateInputs()) return;
             
-            int nroHab = Integer.parseInt(view.getNroHabitacion());
-            int piso = Integer.parseInt(view.getPiso());
+            int nroHab   = Integer.parseInt(view.getNroHabitacion());
+            int piso     = Integer.parseInt(view.getPiso());
             int idSector = Integer.parseInt(view.getIdSector());
             
-            Habitacion habitacion = new Habitacion(nroHab, piso, view.getOrientacion(), idSector);
+            Habitacion habitacion = new Habitacion(
+                nroHab,
+                piso,
+                view.getOrientacion(),
+                idSector
+            );
+            
             service.updateHabitacion(habitacion);
             showSuccess("Habitación updated successfully!");
             view.clearForm();
@@ -125,6 +153,7 @@ public class HabitacionController extends BaseController {
         } catch (NumberFormatException e) {
             showError("Invalid number format");
         } catch (DataAccessException e) {
+            // si hay camas con historial, el DAO/BD tirará error de FK
             handleDataAccessException(e);
         } catch (Exception e) {
             handleException(e);
@@ -142,5 +171,105 @@ public class HabitacionController extends BaseController {
         }
         return true;
     }
+
+    /* ==================== CAMAS ==================== */
+
+    /** Cargar las camas de la habitación seleccionada en la tabla de la derecha */
+    private void loadCamasForSelectedHabitacion() {
+        try {
+            String nroHabStr = view.getNroHabitacion();
+            if (nroHabStr == null || nroHabStr.trim().isEmpty()) {
+                view.updateCamasTable(java.util.Collections.emptyList());
+                view.setNroCama("");
+                return;
+            }
+
+            int nroHab = Integer.parseInt(nroHabStr);
+            List<Cama> camas = service.getCamasByHabitacion(nroHab); 
+            view.updateCamasTable(camas);
+            view.setNroCama(""); // limpiamos campo cama
+
+        } catch (NumberFormatException e) {
+            // algo raro con el nro de habitación, limpiamos
+            view.updateCamasTable(java.util.Collections.emptyList());
+            view.setNroCama("");
+            logger.warning("Invalid nroHabitacion when loading camas: " + e.getMessage());
+        } catch (DataAccessException e) {
+            handleDataAccessException(e);
+        }
+    }
+
+    /** Alta de cama para la habitación seleccionada */
+    private void addCama() {
+        try {
+            logger.info("User initiating add cama");
+
+            String habTxt = view.getNroHabitacion();
+            String camaTxt = view.getNroCama();
+
+            if (habTxt == null || habTxt.trim().isEmpty()) {
+                showError("Debe seleccionar una habitación para agregar una cama.");
+                return;
+            }
+            if (camaTxt == null || camaTxt.trim().isEmpty()) {
+                showError("Debe ingresar el número de cama.");
+                return;
+            }
+
+            int nroHab = Integer.parseInt(habTxt.trim());
+            int nroCama = Integer.parseInt(camaTxt.trim());
+
+            service.agregarCama(nroHab, nroCama);   // llama a sp_agregar_cama
+
+            showSuccess("Cama creada correctamente.");
+            loadCamasForSelectedHabitacion();
+
+        } catch (NumberFormatException e) {
+            showError("Nro Habitación y Nro Cama deben ser numéricos.");
+        } catch (DataAccessException e) {
+            handleDataAccessException(e);
+        } catch (Exception e) {
+            handleException(e);
+        }
+    }
+
+    /** Baja / desactivación de cama según historial */
+    private void deleteCama() {
+        try {
+            logger.info("User initiating delete cama");
+
+            String habTxt = view.getNroHabitacion();
+            String camaTxt = view.getNroCama();
+
+            if (habTxt == null || habTxt.trim().isEmpty()) {
+                showError("Debe seleccionar una habitación.");
+                return;
+            }
+            if (camaTxt == null || camaTxt.trim().isEmpty()) {
+                showError("Debe seleccionar o ingresar una cama.");
+                return;
+            }
+
+            int nroHab = Integer.parseInt(habTxt.trim());
+            int nroCama = Integer.parseInt(camaTxt.trim());
+
+            if (!showConfirmation("¿Eliminar / desactivar cama " + nroCama + " de la habitación " + nroHab + "?")) {
+                return;
+            }
+
+            service.eliminarODesactivarCama(nroHab, nroCama); // sp_eliminar_o_desactivar_cama
+
+            showSuccess("Cama eliminada / desactivada correctamente.");
+            loadCamasForSelectedHabitacion();
+
+        } catch (NumberFormatException e) {
+            showError("Nro Habitación y Nro Cama deben ser numéricos.");
+        } catch (DataAccessException e) {
+            handleDataAccessException(e);
+        } catch (Exception e) {
+            handleException(e);
+        }
+    }
 }
+
 

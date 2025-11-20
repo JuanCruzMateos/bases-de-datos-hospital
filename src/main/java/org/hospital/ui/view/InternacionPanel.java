@@ -25,6 +25,9 @@ public class InternacionPanel extends JPanel {
     private JButton btnRefresh;
     private JButton btnClear;
     private JButton btnFilterActivas;
+    private JTextField txtNroHabitacion;
+    private JTextField txtNroCama;
+
     
     public InternacionPanel() {
         setLayout(new BorderLayout(10, 10));
@@ -89,9 +92,23 @@ public class InternacionPanel extends JPanel {
         gbc.gridx = 3;
         txtNroDocumento = new JTextField(15);
         panel.add(txtNroDocumento, gbc);
-        
-        // Matricula
+
+        // Nro Habitación
         gbc.gridx = 0; gbc.gridy = 3;
+        panel.add(new JLabel("Nro Habitación:"), gbc);
+        gbc.gridx = 1;
+        txtNroHabitacion = new JTextField(10);
+        panel.add(txtNroHabitacion, gbc);
+
+        // Nro Cama
+        gbc.gridx = 2; gbc.gridy = 3;
+        panel.add(new JLabel("Nro Cama:"), gbc);
+        gbc.gridx = 3;
+        txtNroCama = new JTextField(10);
+        panel.add(txtNroCama, gbc);
+
+        // Matricula
+        gbc.gridx = 0; gbc.gridy = 4;
         panel.add(new JLabel("Matrícula Médico:"), gbc);
         gbc.gridx = 1;
         txtMatricula = new JTextField(10);
@@ -113,7 +130,7 @@ public class InternacionPanel extends JPanel {
         buttonPanel.add(btnRefresh);
         buttonPanel.add(btnFilterActivas);
         
-        gbc.gridx = 0; gbc.gridy = 4;
+        gbc.gridx = 0; gbc.gridy = 5;
         gbc.gridwidth = 4;
         panel.add(buttonPanel, gbc);
         
@@ -149,6 +166,8 @@ public class InternacionPanel extends JPanel {
     public String getNroDocumento() { return txtNroDocumento.getText().trim(); }
     public String getMatricula() { return txtMatricula.getText().trim(); }
     public boolean isActiva() { return chkActiva.isSelected(); }
+    public String getNroHabitacion() {return txtNroHabitacion.getText().trim();}
+    public String getNroCama() {return txtNroCama.getText().trim();}
     
     // Setters
     public void setNroInternacion(String value) { txtNroInternacion.setText(value); }
@@ -157,7 +176,9 @@ public class InternacionPanel extends JPanel {
     public void setTipoDocumento(String value) { txtTipoDocumento.setText(value); }
     public void setNroDocumento(String value) { txtNroDocumento.setText(value); }
     public void setMatricula(String value) { txtMatricula.setText(value); }
-    
+    public void setNroHabitacion(String nroHabitacion) {txtNroHabitacion.setText(nroHabitacion);}
+    public void setNroCama(String nroCama) {txtNroCama.setText(nroCama);}
+
     public void clearForm() {
         txtNroInternacion.setText("");
         txtFechaInicio.setText("");
@@ -167,6 +188,8 @@ public class InternacionPanel extends JPanel {
         txtMatricula.setText("");
         chkActiva.setSelected(false);
         txtFechaFin.setEnabled(true);
+        txtNroHabitacion.setText("");
+        txtNroCama.setText("");
     }
     
     public void updateTable(List<Internacion> internaciones) {

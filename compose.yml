@@ -8,6 +8,7 @@ services:
       - ORACLE_PWD=admin123  # Password for SYS and SYSTEM
     volumes:
       - ./db_scripts/init:/opt/oracle/scripts/startup
+      - ./db_scripts/procedures:/opt/oracle/scripts/procedures
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "sqlplus", "hospital/hospital123@//localhost:1521/FREEPDB1", "@/opt/oracle/scripts/startup/healthcheck.sql"]

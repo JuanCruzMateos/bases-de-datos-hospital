@@ -14,18 +14,34 @@ import org.hospital.exception.DataAccessException;
 
 public class HabitacionDaoImpl implements HabitacionDao {
     private static final Logger logger = Logger.getLogger(HabitacionDaoImpl.class.getName());
-    private static final String INSERT_SQL = 
+
+    private static final String INSERT_SQL =
             "INSERT INTO HABITACION (piso, orientacion, id_sector) VALUES (?, ?, ?)";
-    private static final String SELECT_BY_ID_SQL = 
-            "SELECT nro_habitacion, piso, orientacion, id_sector FROM HABITACION WHERE nro_habitacion = ?";
-    private static final String SELECT_ALL_SQL = 
-            "SELECT nro_habitacion, piso, orientacion, id_sector FROM HABITACION ORDER BY piso, nro_habitacion";
-    private static final String SELECT_BY_SECTOR_SQL = 
-            "SELECT nro_habitacion, piso, orientacion, id_sector FROM HABITACION WHERE id_sector = ? ORDER BY piso, nro_habitacion";
-    private static final String UPDATE_SQL = 
-            "UPDATE HABITACION SET piso = ?, orientacion = ?, id_sector = ? WHERE nro_habitacion = ?";
-    private static final String DELETE_SQL = 
+
+    private static final String SELECT_BY_ID_SQL =
+            "SELECT nro_habitacion, piso, orientacion, id_sector " +
+            "FROM HABITACION " +
+            "WHERE nro_habitacion = ?";
+
+    private static final String SELECT_ALL_SQL =
+            "SELECT nro_habitacion, piso, orientacion, id_sector " +
+            "FROM HABITACION " +
+            "ORDER BY piso, nro_habitacion";
+
+    private static final String SELECT_BY_SECTOR_SQL =
+            "SELECT nro_habitacion, piso, orientacion, id_sector " +
+            "FROM HABITACION " +
+            "WHERE id_sector = ? " +
+            "ORDER BY piso, nro_habitacion";
+
+    private static final String UPDATE_SQL =
+            "UPDATE HABITACION " +
+            "SET piso = ?, orientacion = ?, id_sector = ? " +
+            "WHERE nro_habitacion = ?";
+
+    private static final String DELETE_SQL =
             "DELETE FROM HABITACION WHERE nro_habitacion = ?";
+
 
     @Override
     public Habitacion create(Habitacion habitacion) throws DataAccessException {

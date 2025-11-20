@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
+import java.sql.CallableStatement;
+import java.sql.Types;
 
 import org.hospital.config.DatabaseConfig;
 import org.hospital.exception.DataAccessException;
@@ -391,6 +393,106 @@ public class CamaDaoImpl implements CamaDao {
             }
             logger.severe("Failed to delete cama: " + e.getMessage());
             throw new DataAccessException("Error deleting cama", e);
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    logger.warning("Failed to close connection: " + e.getMessage());
+                }
+            }
+        }
+    }
+
+    @Override
+    public void agregarCama(int nroHabitacion, int nroCama) throws DataAccessException {
+        logger.info("DAO: Adding cama " + nroCama + " to habitacion " + nroHabitacion);
+        Connection connection = null;
+        String sql = "{ call sp_agregar_cama(?, ?) }";
+
+        try {
+            connection = DatabaseConfig.getConnection();
+            connection.setAutoCommit(false);
+
+            try (CallableStatement stmt = connection.prepareCall(sql)) {
+                // 1) Habitacion (IN)
+                stmt.setInt(1, nroHabitacion);
+
+                // 2) Cama (IN OUT)
+                //    Si nroCama <= 0 lo tratamos como "campo vacío"
+                if (nroCama <= 0) {
+                    stmt.setNull(2, Types.INTEGER);
+                } else {
+                    stmt.setInt(2, nroCama);
+                }
+
+                // Registramos OUT para leer el número final asignado
+                stmt.registerOutParameter(2, Types.INTEGER);
+
+                // Ejecutamos la SP
+                stmt.execute();
+
+                // Obtenemos el número de cama definitivo (sea el ingresado o el auto)
+                int camaAsignada = stmt.getInt(2);
+                nroCama = camaAsignada;
+            }
+
+            connection.commit();
+            logger.info("Successfully added cama " + nroCama + " to habitacion " + nroHabitacion);
+
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                    logger.warning("Transaction rolled back for agregarCama");
+                } catch (SQLException ex) {
+                    logger.severe("Failed to rollback transaction: " + ex.getMessage());
+                }
+            }
+            logger.severe("Failed to call sp_agregar_cama: " + e.getMessage());
+            throw new DataAccessException("Error calling sp_agregar_cama", e);
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    logger.warning("Failed to close connection: " + e.getMessage());
+                }
+            }
+        }
+    }
+
+    @Override
+    public void eliminarODesactivarCama(int nroHabitacion, int nroCama) throws DataAccessException {
+        logger.info("DAO: Deleting/Disabling cama " + nroCama + " from habitacion " + nroHabitacion);
+        Connection connection = null;
+        String sql = "{ call sp_eliminar_o_desactivar_cama(?, ?) }";
+
+        try {
+            connection = DatabaseConfig.getConnection();
+            connection.setAutoCommit(false);
+
+            try (CallableStatement stmt = connection.prepareCall(sql)) {
+                stmt.setInt(1, nroHabitacion);
+                stmt.setInt(2, nroCama);
+                stmt.execute();
+            }
+
+            connection.commit();
+            logger.info("Successfully executed sp_eliminar_o_desactivar_cama for cama " 
+                        + nroCama + " in habitacion " + nroHabitacion);
+
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                    logger.warning("Transaction rolled back for eliminarODesactivarCama");
+                } catch (SQLException ex) {
+                    logger.severe("Failed to rollback transaction: " + ex.getMessage());
+                }
+            }
+            logger.severe("Failed to call sp_eliminar_o_desactivar_cama: " + e.getMessage());
+            throw new DataAccessException("Error calling sp_eliminar_o_desactivar_cama", e);
         } finally {
             if (connection != null) {
                 try {
