@@ -75,7 +75,9 @@ public class HabitacionController extends BaseController {
             int piso = Integer.parseInt(view.getPiso());
             int idSector = Integer.parseInt(view.getIdSector());
             
+            // Para alta: nroHabitacion = 0, lo genera la BD
             Habitacion habitacion = new Habitacion(0, piso, view.getOrientacion(), idSector);
+
             service.createHabitacion(habitacion);
             showSuccess("Habitación created successfully!");
             view.clearForm();
@@ -91,18 +93,24 @@ public class HabitacionController extends BaseController {
             handleException(e);
         }
     }
-    
+
     private void updateHabitacion() {
         try {
             logger.info("User initiating update habitacion");
             
             if (view.getNroHabitacion().isEmpty() || !validateInputs()) return;
             
-            int nroHab = Integer.parseInt(view.getNroHabitacion());
-            int piso = Integer.parseInt(view.getPiso());
+            int nroHab   = Integer.parseInt(view.getNroHabitacion());
+            int piso     = Integer.parseInt(view.getPiso());
             int idSector = Integer.parseInt(view.getIdSector());
             
-            Habitacion habitacion = new Habitacion(nroHab, piso, view.getOrientacion(), idSector);
+            Habitacion habitacion = new Habitacion(
+                nroHab,
+                piso,
+                view.getOrientacion(),
+                idSector
+            );
+            
             service.updateHabitacion(habitacion);
             showSuccess("Habitación updated successfully!");
             view.clearForm();

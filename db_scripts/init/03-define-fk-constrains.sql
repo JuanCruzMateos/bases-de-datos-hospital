@@ -22,7 +22,7 @@ ALTER TABLE MEDICO ADD (
     CONSTRAINT chk_medico_max_guardia
         CHECK (max_cant_guardia >= 0)
 );
--- Restriccion para periodo_vacaciones: debe ser NULL (por si es nuevo) o uno de los meses del año
+-- Restriccion para periodo_vacaciones: puede ser NULL (por si es nuevo) o uno de los meses del año
 ALTER TABLE MEDICO ADD (
     CONSTRAINT chk_medico_periodo_vacaciones
         CHECK (
@@ -39,13 +39,13 @@ ALTER TABLE MEDICO ADD (
 ALTER TABLE HABITACION ADD (
     CONSTRAINT fk_habitacion_sector
         FOREIGN KEY (id_sector)
-        REFERENCES SECTOR (id_sector)
-        ON DELETE CASCADE,
+        REFERENCES SECTOR (id_sector),
     CONSTRAINT chk_habitacion_piso
         CHECK (piso >= 0),
     CONSTRAINT chk_habitacion_orientacion
         CHECK (orientacion IN ('NORTE', 'SUR', 'ESTE', 'OESTE'))
 );
+
 
 ALTER TABLE CAMA ADD (
     CONSTRAINT fk_cama_habitacion

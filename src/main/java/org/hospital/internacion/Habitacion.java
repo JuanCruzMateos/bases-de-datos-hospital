@@ -18,6 +18,12 @@ public class Habitacion {
         this.idSector = idSector;
     }
 
+    public Habitacion(int piso, String orientacion, int idSector) {
+        this.piso = piso;
+        this.orientacion = orientacion;
+        this.idSector = idSector;
+    }
+
     public int getNroHabitacion() {
         return nroHabitacion;
     }
