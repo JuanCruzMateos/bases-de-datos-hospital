@@ -219,7 +219,7 @@ BEGIN
     IF v_tipo_doc_medico = :NEW.tipo_documento  AND v_nro_doc_medico = :NEW.nro_documento THEN
         RAISE_APPLICATION_ERROR(
             -20001,
-            'El médico principal no puede ser la misma persona que el paciente.'
+            'El medico principal no puede ser la misma persona que el paciente.'
         );
     END IF;
 EXCEPTION
@@ -227,7 +227,7 @@ EXCEPTION
         -- Por coherencia con la FK, esto no debería ocurrir; si pasa, lo tratamos como error.
         RAISE_APPLICATION_ERROR(
             -20002,
-            'No se encontró el médico con la matrícula ' || :NEW.matricula ||
+            'No se encontro el medico con la matricula ' || :NEW.matricula ||
             ' al validar la internación.'
         );
 END;

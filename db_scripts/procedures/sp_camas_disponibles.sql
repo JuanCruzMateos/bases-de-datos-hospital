@@ -90,7 +90,7 @@ BEGIN
                 IF v_count > 0 THEN
                         RAISE_APPLICATION_ERROR(
                         -20032,
-                        'La cama ' || p_nro_cama || ' ya existe en la habitación ' || p_nro_habitacion || '.'
+                        'La cama ' || p_nro_cama || ' ya existe en la habitacion ' || p_nro_habitacion || '.'
                         );
                 END IF;
 
@@ -161,7 +161,7 @@ EXCEPTION
         WHEN NO_DATA_FOUND THEN
                 RAISE_APPLICATION_ERROR(
                 -20030,
-                'La cama indicada no existe en esa habitación.'
+                'La cama indicada no existe en esa habitacion.'
                 );
 END;
 /

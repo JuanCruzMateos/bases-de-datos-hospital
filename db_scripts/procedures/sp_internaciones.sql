@@ -92,13 +92,13 @@ EXCEPTION
             -- No existe esa cama o no está LIBRE
             RAISE_APPLICATION_ERROR(
                 -20003,
-                'La cama/habitación indicada no existe o no está LIBRE.'
+                'La cama/habitación indicada no existe o no esta LIBRE.'
             );
         ELSE
             -- No hay ninguna cama LIBRE
             RAISE_APPLICATION_ERROR(
                 -20001,
-                'No hay camas libres disponibles para asignar la internación.'
+                'No hay camas libres disponibles para asignar la internacion.'
             );
         END IF;
 END;
