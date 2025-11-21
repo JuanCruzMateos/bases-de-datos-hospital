@@ -202,24 +202,34 @@ END;
 -- =============================================================================
 
 CREATE OR REPLACE TRIGGER trg_int_paciente_medico_distintos
-BEFORE INSERT OR UPDATE OF tipoDocumento, nroDocumento, matricula ON Internacion
+BEFORE INSERT OR UPDATE OF tipo_documento, nro_documento, matricula
+ON INTERNACION
 FOR EACH ROW
 DECLARE
-    v_tipo_doc_medico   Medico.tipoDocumento%TYPE;
-    v_nro_doc_medico    Medico.nroDocumento%TYPE;
+    v_tipo_doc_medico   MEDICO.tipo_documento%TYPE;
+    v_nro_doc_medico    MEDICO.nro_documento%TYPE;
 BEGIN
     -- Buscamos los datos de persona del médico principal
-    SELECT tipoDocumento, nroDocumento
+    SELECT tipo_documento, nro_documento
     INTO v_tipo_doc_medico, v_nro_doc_medico
-    FROM Medico
+    FROM MEDICO
     WHERE matricula = :NEW.matricula;
 
     -- Si el médico y el paciente tienen el mismo doc, rechazamos la operación
-    IF v_tipo_doc_medico = :NEW.tipoDocumento   AND v_nro_doc_medico = :NEW.nroDocumento THEN
+    IF v_tipo_doc_medico = :NEW.tipo_documento  AND v_nro_doc_medico = :NEW.nro_documento THEN
         RAISE_APPLICATION_ERROR(
             -20001,
             'El médico principal no puede ser la misma persona que el paciente.'
         );
     END IF;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        -- Por coherencia con la FK, esto no debería ocurrir; si pasa, lo tratamos como error.
+        RAISE_APPLICATION_ERROR(
+            -20002,
+            'No se encontró el médico con la matrícula ' || :NEW.matricula ||
+            ' al validar la internación.'
+        );
 END;
 /
+
