@@ -196,3 +196,30 @@ BEGIN
     END IF;
 END;
 /
+
+-- =============================================================================
+-- 5. Chequeo: médico principal distinto al paciente en internación
+-- =============================================================================
+
+CREATE OR REPLACE TRIGGER trg_int_paciente_medico_distintos
+BEFORE INSERT OR UPDATE OF tipoDocumento, nroDocumento, matricula ON Internacion
+FOR EACH ROW
+DECLARE
+    v_tipo_doc_medico   Medico.tipoDocumento%TYPE;
+    v_nro_doc_medico    Medico.nroDocumento%TYPE;
+BEGIN
+    -- Buscamos los datos de persona del médico principal
+    SELECT tipoDocumento, nroDocumento
+    INTO v_tipo_doc_medico, v_nro_doc_medico
+    FROM Medico
+    WHERE matricula = :NEW.matricula;
+
+    -- Si el médico y el paciente tienen el mismo doc, rechazamos la operación
+    IF v_tipo_doc_medico = :NEW.tipoDocumento   AND v_nro_doc_medico = :NEW.nroDocumento THEN
+        RAISE_APPLICATION_ERROR(
+            -20001,
+            'El médico principal no puede ser la misma persona que el paciente.'
+        );
+    END IF;
+END;
+/

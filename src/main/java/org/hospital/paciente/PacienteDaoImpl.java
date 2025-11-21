@@ -33,6 +33,12 @@ public class PacienteDaoImpl implements PacienteDao {
             "UPDATE PACIENTE SET fecha_nacimiento = ?, sexo = ? WHERE tipo_documento = ? AND nro_documento = ?";
     private static final String DELETE_PACIENTE_SQL = "DELETE FROM PACIENTE WHERE tipo_documento = ? AND nro_documento = ?";
     private static final String DELETE_PERSONA_SQL = "DELETE FROM PERSONA WHERE tipo_documento = ? AND nro_documento = ?";
+    private static final String SELECT_PERSONA_EXISTS_SQL =
+            "SELECT 1 FROM PERSONA WHERE tipo_documento = ? AND nro_documento = ?";
+    private static final String COUNT_PACIENTE_BY_DOC_SQL =
+            "SELECT COUNT(*) FROM PACIENTE WHERE tipo_documento = ? AND nro_documento = ?";
+    private static final String COUNT_MEDICO_BY_DOC_SQL =
+            "SELECT COUNT(*) FROM MEDICO WHERE tipo_documento = ? AND nro_documento = ?";
 
     @Override
     public Paciente create(Paciente paciente) throws DataAccessException {
@@ -42,18 +48,38 @@ public class PacienteDaoImpl implements PacienteDao {
         try {
             connection = DatabaseConfig.getConnection();
             connection.setAutoCommit(false);
-            
-            // Insert into PERSONA table first
-            try (PreparedStatement personaStmt = connection.prepareStatement(INSERT_PERSONA_SQL)) {
-                personaStmt.setString(1, paciente.getTipoDocumento());
-                personaStmt.setString(2, paciente.getNroDocumento());
-                personaStmt.setString(3, paciente.getNombre());
-                personaStmt.setString(4, paciente.getApellido());
-                personaStmt.setString(5, paciente.getTipo());
-                personaStmt.executeUpdate();
+
+            // 1) Verificar si la PERSONA ya existe
+            boolean personaExiste = false;
+            try (PreparedStatement checkStmt = connection.prepareStatement(SELECT_PERSONA_EXISTS_SQL)) {
+                checkStmt.setString(1, paciente.getTipoDocumento());
+                checkStmt.setString(2, paciente.getNroDocumento());
+                try (ResultSet rs = checkStmt.executeQuery()) {
+                    if (rs.next()) {
+                        personaExiste = true;
+                    }
+                }
             }
-            
-            // Then insert into PACIENTE table
+
+            // 2) Insertar en PERSONA solo si NO existe
+            if (!personaExiste) {
+                logger.info("Persona does not exist yet, inserting into PERSONA for paciente " 
+                        + paciente.getTipoDocumento() + " " + paciente.getNroDocumento());
+                try (PreparedStatement personaStmt = connection.prepareStatement(INSERT_PERSONA_SQL)) {
+                    personaStmt.setString(1, paciente.getTipoDocumento());
+                    personaStmt.setString(2, paciente.getNroDocumento());
+                    personaStmt.setString(3, paciente.getNombre());
+                    personaStmt.setString(4, paciente.getApellido());
+                    personaStmt.setString(5, paciente.getTipo());
+                    personaStmt.executeUpdate();
+                }
+            } else {
+                logger.info("Persona already exists for paciente " 
+                        + paciente.getTipoDocumento() + " " + paciente.getNroDocumento()
+                        + ", skipping INSERT into PERSONA");
+            }
+
+            // 3) Insertar SIEMPRE en PACIENTE (si ya existía el paciente, fallará por PK, como corresponde)
             try (PreparedStatement pacienteStmt = connection.prepareStatement(INSERT_PACIENTE_SQL)) {
                 pacienteStmt.setString(1, paciente.getTipoDocumento());
                 pacienteStmt.setString(2, paciente.getNroDocumento());
@@ -61,7 +87,7 @@ public class PacienteDaoImpl implements PacienteDao {
                 pacienteStmt.setString(4, String.valueOf(paciente.getSexo()));
                 pacienteStmt.executeUpdate();
             }
-            
+
             connection.commit();
             logger.info("Successfully created paciente: " + paciente.getNroDocumento());
             return paciente;
@@ -86,7 +112,7 @@ public class PacienteDaoImpl implements PacienteDao {
             }
         }
     }
-
+   
     @Override
     public Optional<Paciente> findByTipoDocumentoAndNroDocumento(String tipoDocumento, String nroDocumento) 
             throws DataAccessException {
@@ -207,8 +233,8 @@ public class PacienteDaoImpl implements PacienteDao {
         try {
             connection = DatabaseConfig.getConnection();
             connection.setAutoCommit(false);
-            
-            // Delete from PACIENTE table first
+
+            // 1) Borrar de PACIENTE
             try (PreparedStatement pacienteStmt = connection.prepareStatement(DELETE_PACIENTE_SQL)) {
                 pacienteStmt.setString(1, tipoDocumento);
                 pacienteStmt.setString(2, nroDocumento);
@@ -219,14 +245,45 @@ public class PacienteDaoImpl implements PacienteDao {
                     return false;
                 }
             }
-            
-            // Then delete from PERSONA table
-            try (PreparedStatement personaStmt = connection.prepareStatement(DELETE_PERSONA_SQL)) {
-                personaStmt.setString(1, tipoDocumento);
-                personaStmt.setString(2, nroDocumento);
-                personaStmt.executeUpdate();
+
+            // 2) Verificar si la PERSONA sigue teniendo algún rol (PACIENTE o MEDICO)
+            int countPacientes = 0;
+            int countMedicos = 0;
+
+            try (PreparedStatement countPacStmt = connection.prepareStatement(COUNT_PACIENTE_BY_DOC_SQL)) {
+                countPacStmt.setString(1, tipoDocumento);
+                countPacStmt.setString(2, nroDocumento);
+                try (ResultSet rs = countPacStmt.executeQuery()) {
+                    if (rs.next()) {
+                        countPacientes = rs.getInt(1);
+                    }
+                }
             }
-            
+
+            try (PreparedStatement countMedStmt = connection.prepareStatement(COUNT_MEDICO_BY_DOC_SQL)) {
+                countMedStmt.setString(1, tipoDocumento);
+                countMedStmt.setString(2, nroDocumento);
+                try (ResultSet rs = countMedStmt.executeQuery()) {
+                    if (rs.next()) {
+                        countMedicos = rs.getInt(1);
+                    }
+                }
+            }
+
+            // 3) Solo borrar de PERSONA si ya no tiene NINGÚN rol
+            if (countPacientes == 0 && countMedicos == 0) {
+                logger.info("Persona has no remaining roles, deleting from PERSONA: "
+                        + tipoDocumento + " " + nroDocumento);
+                try (PreparedStatement personaStmt = connection.prepareStatement(DELETE_PERSONA_SQL)) {
+                    personaStmt.setString(1, tipoDocumento);
+                    personaStmt.setString(2, nroDocumento);
+                    personaStmt.executeUpdate();
+                }
+            } else {
+                logger.info("Persona still has other roles (paciente/medico), skipping delete from PERSONA: "
+                        + tipoDocumento + " " + nroDocumento);
+            }
+
             connection.commit();
             logger.info("Successfully deleted paciente: " + tipoDocumento + " " + nroDocumento);
             return true;
@@ -251,6 +308,7 @@ public class PacienteDaoImpl implements PacienteDao {
             }
         }
     }
+
 
     private Paciente mapToPaciente(ResultSet resultSet) throws SQLException {
         return new Paciente(

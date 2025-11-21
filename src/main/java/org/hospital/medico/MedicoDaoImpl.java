@@ -47,6 +47,13 @@ public class MedicoDaoImpl implements MedicoDao {
             "FROM ESPECIALIDAD e " +
             "JOIN SE_ESPECIALIZA_EN se ON e.cod_especialidad = se.cod_especialidad " +
             "WHERE se.matricula = ?";
+    private static final String SELECT_PERSONA_EXISTS_SQL =
+            "SELECT 1 FROM PERSONA WHERE tipo_documento = ? AND nro_documento = ?";
+    private static final String COUNT_PACIENTE_BY_DOC_SQL =
+            "SELECT COUNT(*) FROM PACIENTE WHERE tipo_documento = ? AND nro_documento = ?";
+    private static final String COUNT_MEDICO_BY_DOC_SQL =
+            "SELECT COUNT(*) FROM MEDICO WHERE tipo_documento = ? AND nro_documento = ?";
+
 
     @Override
     public Medico create(Medico medico) throws DataAccessException {
@@ -56,24 +63,55 @@ public class MedicoDaoImpl implements MedicoDao {
         try {
             connection = DatabaseConfig.getConnection();
             connection.setAutoCommit(false);
-            
-            // Insert into PERSONA table first
-            try (PreparedStatement personaStmt = connection.prepareStatement(INSERT_PERSONA_SQL)) {
-                personaStmt.setString(1, medico.getTipoDocumento());
-                personaStmt.setString(2, medico.getNroDocumento());
-                personaStmt.setString(3, medico.getNombre());
-                personaStmt.setString(4, medico.getApellido());
-                personaStmt.setString(5, medico.getTipo());
-                personaStmt.executeUpdate();
+
+            // 1) Verificar si la PERSONA ya existe
+            boolean personaExiste = false;
+            try (PreparedStatement checkStmt = connection.prepareStatement(SELECT_PERSONA_EXISTS_SQL)) {
+                checkStmt.setString(1, medico.getTipoDocumento());
+                checkStmt.setString(2, medico.getNroDocumento());
+                try (ResultSet rs = checkStmt.executeQuery()) {
+                    if (rs.next()) {
+                        personaExiste = true;
+                    }
+                }
             }
-            
-            // Then insert into MEDICO table
+
+            // 2) Insertar en PERSONA solo si NO existe
+            if (!personaExiste) {
+                logger.info("Persona does not exist yet, inserting into PERSONA for medico "
+                        + medico.getTipoDocumento() + " " + medico.getNroDocumento());
+                try (PreparedStatement personaStmt = connection.prepareStatement(INSERT_PERSONA_SQL)) {
+                    personaStmt.setString(1, medico.getTipoDocumento());
+                    personaStmt.setString(2, medico.getNroDocumento());
+                    personaStmt.setString(3, medico.getNombre());
+                    personaStmt.setString(4, medico.getApellido());
+                    personaStmt.setString(5, medico.getTipo());
+                    personaStmt.executeUpdate();
+                }
+            } else {
+                logger.info("Persona already exists for medico "
+                        + medico.getTipoDocumento() + " " + medico.getNroDocumento()
+                        + ", skipping INSERT into PERSONA");
+            }
+
+            // 3) Insertar en MEDICO
             try (PreparedStatement medicoStmt = connection.prepareStatement(INSERT_MEDICO_SQL)) {
-                bindMedico(medicoStmt, medico);
+                medicoStmt.setLong(1, medico.getMatricula());
+                medicoStmt.setString(2, medico.getCuilCuit());
+                medicoStmt.setDate(3, toSqlDate(medico.getFechaIngreso()));
+                if (medico.getFoto() != null) {
+                    medicoStmt.setBytes(4, medico.getFoto());
+                } else {
+                    medicoStmt.setNull(4, java.sql.Types.BLOB);
+                }
+                medicoStmt.setInt(5, medico.getMaxCantGuardia());
+                medicoStmt.setString(6, medico.getPeriodoVacaciones());
+                medicoStmt.setString(7, medico.getTipoDocumento());
+                medicoStmt.setString(8, medico.getNroDocumento());
                 medicoStmt.executeUpdate();
             }
 
-            // Finally insert especialidades into SE_ESPECIALIZA_EN table
+            // 4) Insertar especialidades
             if (medico.getEspecialidades() != null && !medico.getEspecialidades().isEmpty()) {
                 try (PreparedStatement especialidadStmt = connection.prepareStatement(INSERT_ESPECIALIDAD_SQL)) {
                     for (Especialidad especialidad : medico.getEspecialidades()) {
@@ -83,7 +121,7 @@ public class MedicoDaoImpl implements MedicoDao {
                     }
                 }
             }
-            
+
             connection.commit();
             logger.info("Successfully created medico: " + medico.getMatricula());
             return medico;
@@ -108,6 +146,7 @@ public class MedicoDaoImpl implements MedicoDao {
             }
         }
     }
+
 
     @Override
     public Optional<Medico> findByMatricula(long matricula) throws DataAccessException {
@@ -249,11 +288,11 @@ public class MedicoDaoImpl implements MedicoDao {
         try {
             connection = DatabaseConfig.getConnection();
             connection.setAutoCommit(false);
-            
-            // First get the persona info before deleting (within same transaction)
+
+            // 1) Obtener datos de PERSONA asociados al médico
             String tipoDocumento = null;
             String nroDocumento = null;
-            
+
             try (PreparedStatement selectStmt = connection.prepareStatement(
                     "SELECT tipo_documento, nro_documento FROM MEDICO WHERE matricula = ?")) {
                 selectStmt.setLong(1, matricula);
@@ -268,26 +307,57 @@ public class MedicoDaoImpl implements MedicoDao {
                     }
                 }
             }
-            
-            // Delete from SE_ESPECIALIZA_EN table first (due to FK constraint)
+
+            // 2) Borrar especialidades (FK)
             try (PreparedStatement especialidadStmt = connection.prepareStatement(DELETE_ALL_ESPECIALIDADES_SQL)) {
                 especialidadStmt.setLong(1, matricula);
                 especialidadStmt.executeUpdate();
             }
-            
-            // Then delete from MEDICO table
+
+            // 3) Borrar de MEDICO
             try (PreparedStatement medicoStmt = connection.prepareStatement(DELETE_MEDICO_SQL)) {
                 medicoStmt.setLong(1, matricula);
                 medicoStmt.executeUpdate();
             }
-            
-            // Finally delete from PERSONA table
-            try (PreparedStatement personaStmt = connection.prepareStatement(DELETE_PERSONA_SQL)) {
-                personaStmt.setString(1, tipoDocumento);
-                personaStmt.setString(2, nroDocumento);
-                personaStmt.executeUpdate();
+
+            // 4) Verificar si la PERSONA sigue teniendo algún rol
+            int countPacientes = 0;
+            int countMedicos = 0;
+
+            try (PreparedStatement countPacStmt = connection.prepareStatement(COUNT_PACIENTE_BY_DOC_SQL)) {
+                countPacStmt.setString(1, tipoDocumento);
+                countPacStmt.setString(2, nroDocumento);
+                try (ResultSet rs = countPacStmt.executeQuery()) {
+                    if (rs.next()) {
+                        countPacientes = rs.getInt(1);
+                    }
+                }
             }
-            
+
+            try (PreparedStatement countMedStmt = connection.prepareStatement(COUNT_MEDICO_BY_DOC_SQL)) {
+                countMedStmt.setString(1, tipoDocumento);
+                countMedStmt.setString(2, nroDocumento);
+                try (ResultSet rs = countMedStmt.executeQuery()) {
+                    if (rs.next()) {
+                        countMedicos = rs.getInt(1);
+                    }
+                }
+            }
+
+            // 5) Solo borrar PERSONA si ya no tiene roles
+            if (countPacientes == 0 && countMedicos == 0) {
+                logger.info("Persona has no remaining roles, deleting from PERSONA: "
+                        + tipoDocumento + " " + nroDocumento);
+                try (PreparedStatement personaStmt = connection.prepareStatement(DELETE_PERSONA_SQL)) {
+                    personaStmt.setString(1, tipoDocumento);
+                    personaStmt.setString(2, nroDocumento);
+                    personaStmt.executeUpdate();
+                }
+            } else {
+                logger.info("Persona still has other roles (paciente/medico), skipping delete from PERSONA: "
+                        + tipoDocumento + " " + nroDocumento);
+            }
+
             connection.commit();
             logger.info("Successfully deleted medico: " + matricula);
             return true;
@@ -312,6 +382,7 @@ public class MedicoDaoImpl implements MedicoDao {
             }
         }
     }
+
 
     private void bindMedico(PreparedStatement statement, Medico medico) throws SQLException {
         statement.setLong(1, medico.getMatricula());
