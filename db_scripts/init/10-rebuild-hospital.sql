@@ -14,6 +14,7 @@ ALTER SESSION SET CURRENT_SCHEMA = hospital;
 @/opt/oracle/scripts/startup/03-define-fk-constrains.sql
 @/opt/oracle/scripts/startup/04-init-db.sql
 @/opt/oracle/scripts/startup/05-triggers.sql
+@/opt/oracle/scripts/startup/06-indexes.sql
 
 @/opt/oracle/scripts/procedures/sp_internaciones.sql
 @/opt/oracle/scripts/procedures/sp_camas_disponibles.sql

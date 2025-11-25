@@ -1,6 +1,9 @@
 ALTER SESSION SET CONTAINER = FREEPDB1;
 ALTER SESSION SET CURRENT_SCHEMA = hospital;
 
+-- Listado con la cantidad de camas disponibles de cada sector y 
+-- el listado de detalle de esas camas (requerimiento del área de internaciones) 
+
 -- =========================================================
 -- 1. Resumen: cantidad de camas LIBRES por sector
 -- =========================================================
@@ -46,6 +49,9 @@ BEGIN
                     c.nro_cama;
 END;
 /
+
+
+-- EXTRAS:
 
 -- =========================================================
 -- 3. Insercion: agregar una nueva cama a una habitación

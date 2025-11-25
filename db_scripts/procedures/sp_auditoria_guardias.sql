@@ -1,6 +1,9 @@
 ALTER SESSION SET CONTAINER = FREEPDB1;
 ALTER SESSION SET CURRENT_SCHEMA = hospital;
 
+-- Auditoría sobre los usuarios que hacen cambios a datos que afectan el 
+-- proceso de asignación de guardias (requerimiento del área de asignación de guardias) 
+
 -- ========================================================
 -- Auditoria: listado completo de auditoria de guardias
 -- ========================================================

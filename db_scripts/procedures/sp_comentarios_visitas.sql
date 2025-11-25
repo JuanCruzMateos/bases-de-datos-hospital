@@ -1,6 +1,9 @@
 ALTER SESSION SET CONTAINER = FREEPDB1;
 ALTER SESSION SET CURRENT_SCHEMA = hospital;
 
+-- Listado de los comentarios de las visitas médicas a un paciente
+-- en una cierta internación (requerimiento del área de seguimiento médico) 
+
 -- =========================================================
 -- 1. Internaciones: lista de internaciones de un paciente
 -- =========================================================
