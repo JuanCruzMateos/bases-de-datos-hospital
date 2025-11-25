@@ -1,10 +1,16 @@
 package org.hospital.ui.controller;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import javax.imageio.ImageIO;
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import org.hospital.exception.DataAccessException;
 import org.hospital.medico.Especialidad;
 import org.hospital.medico.Medico;
@@ -41,6 +47,8 @@ public class MedicoController extends BaseController {
             view.clearForm();
             currentMedico = null;
         });
+        view.getBtnLoadFoto().addActionListener(e -> loadFotoFromFile());
+        view.getBtnClearFoto().addActionListener(e -> view.clearFoto());
         
         // Especialidad management
         view.getBtnAddEspecialidad().addActionListener(e -> addEspecialidadToMedico());
@@ -98,6 +106,7 @@ public class MedicoController extends BaseController {
         view.setFechaIngreso(currentMedico.getFechaIngreso() != null ? currentMedico.getFechaIngreso().toString() : "");
         view.setMaxCantGuardia(String.valueOf(currentMedico.getMaxCantGuardia()));
         view.setPeriodoVacaciones(currentMedico.getPeriodoVacaciones());
+        view.setFotoBytes(currentMedico.getFoto());
 
         // Cargar especialidades
         view.setCurrentEspecialidades(currentMedico.getEspecialidades());
@@ -136,7 +145,7 @@ public class MedicoController extends BaseController {
                 matricula,
                 view.getCuilCuit(),
                 fechaIngreso,
-                null, // foto
+                view.getFotoBytes(),
                 maxCantGuardia,
                 view.getPeriodoVacaciones(),
                 view.getCurrentEspecialidades()
@@ -191,7 +200,7 @@ public class MedicoController extends BaseController {
                 matricula,
                 view.getCuilCuit(),
                 fechaIngreso,
-                currentMedico != null ? currentMedico.getFoto() : null,
+                view.getFotoBytes(),
                 maxCantGuardia,
                 view.getPeriodoVacaciones(),
                 view.getCurrentEspecialidades()
@@ -378,5 +387,27 @@ public class MedicoController extends BaseController {
         }
         return true;
     }
-}
 
+    private void loadFotoFromFile() {
+        JFileChooser chooser = new JFileChooser();
+        chooser.setFileFilter(new FileNameExtensionFilter("Imagenes (jpg, png)", "jpg", "jpeg", "png"));
+        int result = chooser.showOpenDialog(null);
+        if (result != JFileChooser.APPROVE_OPTION) {
+            return;
+        }
+
+        File file = chooser.getSelectedFile();
+        try {
+            BufferedImage img = ImageIO.read(file);
+            if (img == null) {
+                showError("Archivo de imagen no reconocido");
+                return;
+            }
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ImageIO.write(img, "png", baos);
+            view.setFotoBytes(baos.toByteArray());
+        } catch (Exception ex) {
+            showError("No se pudo cargar la foto: " + ex.getMessage());
+        }
+    }
+}

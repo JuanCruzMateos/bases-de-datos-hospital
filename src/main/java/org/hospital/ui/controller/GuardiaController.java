@@ -44,7 +44,10 @@ public class GuardiaController extends BaseController {
         view.getBtnUpdate().addActionListener(e -> updateGuardia());
         view.getBtnDelete().addActionListener(e -> deleteGuardia());
         view.getBtnRefresh().addActionListener(e -> loadGuardias());
-        view.getBtnClear().addActionListener(e -> view.clearForm());
+        view.getBtnClear().addActionListener(e -> {
+            view.clearForm();
+            view.getTable().clearSelection();
+        });
         
         // Load selected guardia to form on table selection
         view.getTable().getSelectionModel().addListSelectionListener(e -> {
@@ -55,29 +58,17 @@ public class GuardiaController extends BaseController {
     }
     
     private void loadInitialData() {
-        try {
-            // Load medicos, especialidades, and turnos for dropdowns
-            medicos = medicoService.getAllMedicos();
-            especialidades = medicoService.getAllEspecialidades();
-            turnos = turnoDao.findAll();
-            
-            view.loadMedicos(medicos);
-            view.loadEspecialidades(especialidades);
-            view.loadTurnos(turnos);
-            
-            // Load guardias into table
-            loadGuardias();
-            
-        } catch (DataAccessException e) {
-            handleDataAccessException(e);
-        }
+        loadGuardias();
     }
     
     private void loadGuardias() {
         try {
+            reloadDropdownData();
             logger.info("Loading all guardias");
             List<Guardia> guardias = guardiaService.getAllGuardias();
             view.updateTable(guardias, medicos, especialidades, turnos);
+            view.getTable().clearSelection();
+            view.clearForm();
             logger.fine("Loaded " + guardias.size() + " guardias");
         } catch (DataAccessException e) {
             handleDataAccessException(e);
@@ -213,5 +204,14 @@ public class GuardiaController extends BaseController {
         }
         return true;
     }
-}
 
+    private void reloadDropdownData() throws DataAccessException {
+        medicos = medicoService.getAllMedicos();
+        especialidades = medicoService.getAllEspecialidades();
+        turnos = turnoDao.findAll();
+
+        view.loadMedicos(medicos);
+        view.loadEspecialidades(especialidades);
+        view.loadTurnos(turnos);
+    }
+}

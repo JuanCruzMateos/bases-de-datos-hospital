@@ -62,6 +62,16 @@ public class MedicoDaoImpl implements MedicoDao {
     // Contar guardias asociadas a una combinación (matricula, cod_especialidad)
     private static final String COUNT_GUARDIA_BY_MEDICO_AND_ESPECIALIDAD_SQL =
             "SELECT COUNT(*) FROM GUARDIA WHERE matricula = ? AND cod_especialidad = ?";
+    private static final String COUNT_GUARDIAS_BY_MEDICO_SQL =
+            "SELECT COUNT(*) FROM GUARDIA WHERE matricula = ?";
+    private static final String COUNT_INTERNACIONES_ACTIVAS_BY_MEDICO_SQL =
+            "SELECT COUNT(*) FROM INTERNACION WHERE matricula = ? AND fecha_fin IS NULL";
+    private static final String COUNT_RECORRIDOS_BY_MEDICO_SQL =
+            "SELECT COUNT(*) FROM RECORRIDO WHERE matricula = ?";
+    private static final String COUNT_COMENTARIOS_BY_MEDICO_SQL =
+            "SELECT COUNT(*) FROM COMENTA_SOBRE cs " +
+            "JOIN RECORRIDO r ON cs.id_recorrido = r.id_recorrido " +
+            "WHERE r.matricula = ?";
 
     @Override
     public Medico create(Medico medico) throws DataAccessException {
@@ -362,6 +372,9 @@ public class MedicoDaoImpl implements MedicoDao {
                 }
             }
 
+            // Validar que no tenga dependencias activas en otras tablas
+            validateMedicoDeletable(connection, matricula);
+
             // 2) Borrar especialidades (FK)
             try (PreparedStatement especialidadStmt = connection.prepareStatement(DELETE_ALL_ESPECIALIDADES_SQL)) {
                 especialidadStmt.setLong(1, matricula);
@@ -437,6 +450,43 @@ public class MedicoDaoImpl implements MedicoDao {
         }
     }
 
+
+
+    private void validateMedicoDeletable(Connection connection, long matricula) throws SQLException {
+        long internacionesActivas = countByMedico(connection, COUNT_INTERNACIONES_ACTIVAS_BY_MEDICO_SQL, matricula);
+        if (internacionesActivas > 0) {
+            throw new IllegalArgumentException(
+                    "No se puede eliminar el medico " + matricula +
+                            " porque es medico principal de internaciones activas (" + internacionesActivas + ").");
+        }
+
+        long guardias = countByMedico(connection, COUNT_GUARDIAS_BY_MEDICO_SQL, matricula);
+        if (guardias > 0) {
+            throw new IllegalArgumentException(
+                    "No se puede eliminar el medico " + matricula +
+                            " porque tiene guardias asociadas (" + guardias + ").");
+        }
+
+        long recorridos = countByMedico(connection, COUNT_RECORRIDOS_BY_MEDICO_SQL, matricula);
+        long comentarios = countByMedico(connection, COUNT_COMENTARIOS_BY_MEDICO_SQL, matricula);
+        if (recorridos > 0 || comentarios > 0) {
+            throw new IllegalArgumentException(
+                    "No se puede eliminar el medico " + matricula +
+                            " porque tiene recorridos/rondas o comentarios asociados.");
+        }
+    }
+
+    private long countByMedico(Connection connection, String sql, long matricula) throws SQLException {
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setLong(1, matricula);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getLong(1);
+                }
+                return 0;
+            }
+        }
+    }
 
     private void bindMedico(PreparedStatement statement, Medico medico) throws SQLException {
         statement.setLong(1, medico.getMatricula());

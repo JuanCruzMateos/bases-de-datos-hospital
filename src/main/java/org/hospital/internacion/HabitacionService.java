@@ -47,7 +47,26 @@ public class HabitacionService {
             throw new IllegalArgumentException("Sector not found with ID: " + habitacion.getIdSector());
         }
         
-        return habitacionDao.create(habitacion);
+        Habitacion creada = habitacionDao.create(habitacion);
+
+        // Participaci��n total: toda habitaci��n debe tener al menos una cama libre
+        try {
+            // Intentamos crear la cama 1. Si la SP decide otro n��mero, igual asegura una cama.
+            camaDao.agregarCama(creada.getNroHabitacion(), 1);
+        } catch (Exception e) {
+            // Si fallamos al crear la cama, revertimos la habitaci��n para no dejarla sin camas
+            try {
+                habitacionDao.delete(creada.getNroHabitacion());
+            } catch (Exception ex) {
+                logger.severe("No se pudo revertir la habitacion sin cama creada: " + ex.getMessage());
+            }
+            if (e instanceof DataAccessException) {
+                throw (DataAccessException) e;
+            }
+            throw new DataAccessException("Error creando cama inicial para la habitacion", e);
+        }
+
+        return creada;
     }
 
     /**

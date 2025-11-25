@@ -69,8 +69,7 @@ ALTER TABLE ESPECIALIDAD
 ALTER TABLE SE_ESPECIALIZA_EN ADD (
     CONSTRAINT fk_se_especializa_en_medico
         FOREIGN KEY (matricula)
-        REFERENCES MEDICO (matricula)
-        ON DELETE CASCADE,
+        REFERENCES MEDICO (matricula),
     CONSTRAINT fk_se_especializa_en_especialidad
         FOREIGN KEY (cod_especialidad)
         REFERENCES ESPECIALIDAD (cod_especialidad)
@@ -97,8 +96,7 @@ ALTER TABLE INTERNACION ADD (
         ON DELETE CASCADE,
     CONSTRAINT fk_internacion_medico
         FOREIGN KEY (matricula)
-        REFERENCES MEDICO (matricula)
-        ON DELETE CASCADE,
+        REFERENCES MEDICO (matricula),
     CONSTRAINT chk_internacion_fecha_inicio
         CHECK (fecha_fin IS NULL OR fecha_inicio <= fecha_fin)
 );
@@ -117,8 +115,7 @@ ALTER TABLE RECORRIDO ADD (
         ON DELETE CASCADE,
     CONSTRAINT fk_recorrido_medico
         FOREIGN KEY (matricula)
-        REFERENCES MEDICO (matricula)
-        ON DELETE CASCADE,
+        REFERENCES MEDICO (matricula),
     CONSTRAINT chk_recorrido_horas
         CHECK (hora_fin > hora_inicio)
 );

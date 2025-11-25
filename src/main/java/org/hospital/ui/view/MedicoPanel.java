@@ -3,10 +3,14 @@ package org.hospital.ui.view;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import javax.imageio.ImageIO;
 import org.hospital.medico.Especialidad;
 import org.hospital.medico.Medico;
 
@@ -25,6 +29,10 @@ public class MedicoPanel extends JPanel {
     private JTextField txtFechaIngreso;
     private JTextField txtMaxCantGuardia;
     private JTextField txtPeriodoVacaciones;
+    private JLabel lblFoto;
+    private JButton btnLoadFoto;
+    private JButton btnClearFoto;
+    private byte[] fotoBytes;
     
     // Especialidades management
     private JList<String> listEspecialidades;
@@ -53,6 +61,7 @@ public class MedicoPanel extends JPanel {
         
         // Top: Form + Especialidades
         JPanel topPanel = new JPanel(new BorderLayout(5, 5));
+        topPanel.add(createFotoPanel(), BorderLayout.WEST);
         topPanel.add(createFormPanel(), BorderLayout.CENTER);
         topPanel.add(createEspecialidadesPanel(), BorderLayout.EAST);
         
@@ -232,6 +241,7 @@ public class MedicoPanel extends JPanel {
     public String getFechaIngreso() { return txtFechaIngreso.getText().trim(); }
     public String getMaxCantGuardia() { return txtMaxCantGuardia.getText().trim(); }
     public String getPeriodoVacaciones() { return txtPeriodoVacaciones.getText().trim(); }
+    public byte[] getFotoBytes() { return fotoBytes; }
     
     // Setters for form fields
     public void setMatricula(String value) { txtMatricula.setText(value); }
@@ -243,6 +253,10 @@ public class MedicoPanel extends JPanel {
     public void setFechaIngreso(String value) { txtFechaIngreso.setText(value); }
     public void setMaxCantGuardia(String value) { txtMaxCantGuardia.setText(value); }
     public void setPeriodoVacaciones(String value) { txtPeriodoVacaciones.setText(value); }
+    public void setFotoBytes(byte[] bytes) { 
+        this.fotoBytes = bytes; 
+        updateFotoPreview(); 
+    }
     
     public void clearForm() {
         txtMatricula.setText("");
@@ -256,6 +270,7 @@ public class MedicoPanel extends JPanel {
         txtPeriodoVacaciones.setText("");
         especialidadesModel.clear();
         currentEspecialidades.clear();
+        setFotoBytes(null);
 
         // Modo "alta": se puede editar identidad
         setIdentityEditable(true);
@@ -353,6 +368,8 @@ public class MedicoPanel extends JPanel {
     public JButton getBtnClear() { return btnClear; }
     public JButton getBtnAddEspecialidad() { return btnAddEspecialidad; }
     public JButton getBtnRemoveEspecialidad() { return btnRemoveEspecialidad; }
+    public JButton getBtnLoadFoto() { return btnLoadFoto; }
+    public JButton getBtnClearFoto() { return btnClearFoto; }
     public JTable getTable() { return table; }
     
     // Helper class for combo box items
@@ -372,5 +389,50 @@ public class MedicoPanel extends JPanel {
             return especialidad.getCodEspecialidad() + " - " + especialidad.getDescripcion();
         }
     }
-}
 
+    private JPanel createFotoPanel() {
+        JPanel panel = new JPanel(new BorderLayout(5, 5));
+        panel.setBorder(BorderFactory.createTitledBorder("Foto"));
+        panel.setPreferredSize(new Dimension(170, 0));
+
+        lblFoto = new JLabel("Sin foto", SwingConstants.CENTER);
+        lblFoto.setPreferredSize(new Dimension(150, 150));
+        lblFoto.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
+        panel.add(lblFoto, BorderLayout.CENTER);
+
+        JPanel buttons = new JPanel(new GridLayout(1, 2, 5, 5));
+        btnLoadFoto = new JButton("Cargar");
+        btnClearFoto = new JButton("Borrar");
+        buttons.add(btnLoadFoto);
+        buttons.add(btnClearFoto);
+        panel.add(buttons, BorderLayout.SOUTH);
+
+        return panel;
+    }
+
+    public void clearFoto() {
+        setFotoBytes(null);
+    }
+
+    private void updateFotoPreview() {
+        if (fotoBytes == null || fotoBytes.length == 0) {
+            lblFoto.setIcon(null);
+            lblFoto.setText("Sin foto");
+            return;
+        }
+        try {
+            BufferedImage img = ImageIO.read(new ByteArrayInputStream(fotoBytes));
+            if (img != null) {
+                Image scaled = img.getScaledInstance(150, 150, Image.SCALE_SMOOTH);
+                lblFoto.setIcon(new ImageIcon(scaled));
+                lblFoto.setText("");
+            } else {
+                lblFoto.setIcon(null);
+                lblFoto.setText("Sin foto");
+            }
+        } catch (IOException e) {
+            lblFoto.setIcon(null);
+            lblFoto.setText("Sin foto");
+        }
+    }
+}
