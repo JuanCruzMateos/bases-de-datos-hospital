@@ -19,5 +19,9 @@ public interface GuardiaDao {
     Guardia update(Guardia guardia) throws DataAccessException;
 
     boolean delete(int nroGuardia) throws DataAccessException;
+
+    int countGuardiasByMedicoAndMonth(long matricula, int year, int month)
+        throws DataAccessException;
+
 }
 

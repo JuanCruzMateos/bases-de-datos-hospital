@@ -75,38 +75,41 @@ public class MedicoController extends BaseController {
     }
     
     private void loadSelectedToForm() {
-        try {
-            Medico selected = view.getSelectedMedico();
-            if (selected == null) return;
-            
-            // Fetch full medico from service
-            Optional<Medico> medicoOpt = service.findMedico(selected.getMatricula());
-            if (!medicoOpt.isPresent()) {
-                showError("Medico not found");
-                return;
-            }
-            
-            currentMedico = medicoOpt.get();
-            
-            // Load to form
-            view.setMatricula(String.valueOf(currentMedico.getMatricula()));
-            view.setTipoDocumento(currentMedico.getTipoDocumento());
-            view.setNroDocumento(currentMedico.getNroDocumento());
-            view.setNombre(currentMedico.getNombre());
-            view.setApellido(currentMedico.getApellido());
-            view.setCuilCuit(currentMedico.getCuilCuit());
-            view.setFechaIngreso(currentMedico.getFechaIngreso() != null ? 
-                    currentMedico.getFechaIngreso().toString() : "");
-            view.setMaxCantGuardia(String.valueOf(currentMedico.getMaxCantGuardia()));
-            view.setPeriodoVacaciones(currentMedico.getPeriodoVacaciones());
-            
-            // Load especialidades
-            view.setCurrentEspecialidades(currentMedico.getEspecialidades());
-            
-        } catch (DataAccessException e) {
-            handleDataAccessException(e);
+    try {
+        Medico selected = view.getSelectedMedico();
+        if (selected == null) return;
+        
+        // Fetch full medico from service
+        Optional<Medico> medicoOpt = service.findMedico(selected.getMatricula());
+        if (!medicoOpt.isPresent()) {
+            showError("Medico not found");
+            return;
         }
+        
+        currentMedico = medicoOpt.get();
+        
+        // Load to form
+        view.setMatricula(String.valueOf(currentMedico.getMatricula()));
+        view.setTipoDocumento(currentMedico.getTipoDocumento());
+        view.setNroDocumento(currentMedico.getNroDocumento());
+        view.setNombre(currentMedico.getNombre());
+        view.setApellido(currentMedico.getApellido());
+        view.setCuilCuit(currentMedico.getCuilCuit());
+        view.setFechaIngreso(currentMedico.getFechaIngreso() != null ? currentMedico.getFechaIngreso().toString() : "");
+        view.setMaxCantGuardia(String.valueOf(currentMedico.getMaxCantGuardia()));
+        view.setPeriodoVacaciones(currentMedico.getPeriodoVacaciones());
+
+        // Cargar especialidades
+        view.setCurrentEspecialidades(currentMedico.getEspecialidades());
+
+        // Modo "edición": identidad bloqueada (grises)
+        view.setIdentityEditable(false);
+        
+    } catch (DataAccessException e) {
+        handleDataAccessException(e);
     }
+}
+
     
     private void createMedico() {
         try {

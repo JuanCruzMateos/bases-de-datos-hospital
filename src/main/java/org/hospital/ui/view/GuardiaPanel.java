@@ -52,7 +52,9 @@ public class GuardiaPanel extends JPanel {
         panel.add(new JLabel("Nro Guardia:"), gbc);
         gbc.gridx = 1;
         txtNroGuardia = new JTextField(10);
-        txtNroGuardia.setToolTipText("Leave empty for auto-generated ID on create");
+        // Igual que en Sector, Habitación e Internación: PK solo lectura
+        txtNroGuardia.setEditable(false);
+        txtNroGuardia.setToolTipText("Generado automáticamente por la base de datos");
         panel.add(txtNroGuardia, gbc);
         
         // Fecha Hora
@@ -200,22 +202,45 @@ public class GuardiaPanel extends JPanel {
     }
     
     public void loadSelectedToForm() {
-        Guardia g = getSelectedGuardia();
-        if (g != null) {
-            setNroGuardia(String.valueOf(g.getNroGuardia()));
-            setFechaHora(g.getFechaHora().toString());
-            
-            // Set combo boxes to match the selected guardia
-            for (int i = 0; i < cmbMedico.getItemCount(); i++) {
-                MedicoComboItem item = cmbMedico.getItemAt(i);
-                if (item.getMedico().getMatricula() == g.getMatricula()) {
-                    cmbMedico.setSelectedIndex(i);
-                    break;
-                }
+        int row = table.getSelectedRow();
+        if (row == -1) return;
+
+        // Campos simples
+        setNroGuardia(tableModel.getValueAt(row, 0).toString());
+        setFechaHora(tableModel.getValueAt(row, 1).toString());
+
+        long matricula = Long.parseLong(tableModel.getValueAt(row, 2).toString());
+
+        // Médico
+        for (int i = 0; i < cmbMedico.getItemCount(); i++) {
+            MedicoComboItem item = cmbMedico.getItemAt(i);
+            if (item.getMedico().getMatricula() == matricula) {
+                cmbMedico.setSelectedIndex(i);
+                break;
+            }
+        }
+
+        // Especialidad (columna 4)
+        String especialidadDesc = tableModel.getValueAt(row, 4).toString();
+        for (int i = 0; i < cmbEspecialidad.getItemCount(); i++) {
+            EspecialidadComboItem item = cmbEspecialidad.getItemAt(i);
+            if (item.getEspecialidad().getDescripcion().equals(especialidadDesc)) {
+                cmbEspecialidad.setSelectedIndex(i);
+                break;
+            }
+        }
+
+        // Turno (columna 5: solo el horario, sin el "id -")
+        String turnoHorario = tableModel.getValueAt(row, 5).toString();
+        for (int i = 0; i < cmbTurno.getItemCount(); i++) {
+            TurnoComboItem item = cmbTurno.getItemAt(i);
+            if (item.getTurno().getHorario().equals(turnoHorario)) {
+                cmbTurno.setSelectedIndex(i);
+                break;
             }
         }
     }
-    
+
     // Load combo box data
     public void loadMedicos(List<Medico> medicos) {
         cmbMedico.removeAllItems();

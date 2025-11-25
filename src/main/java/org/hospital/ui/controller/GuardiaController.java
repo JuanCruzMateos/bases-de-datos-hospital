@@ -129,7 +129,7 @@ public class GuardiaController extends BaseController {
             
             String nroGuardiaStr = view.getNroGuardia();
             if (nroGuardiaStr.isEmpty()) {
-                showError("Please select a guardia to update or enter Nro Guardia");
+                    showError("Please select a guardia to update");
                 return;
             }
             
@@ -166,7 +166,7 @@ public class GuardiaController extends BaseController {
             String nroGuardiaStr = view.getNroGuardia();
             
             if (nroGuardiaStr.isEmpty()) {
-                showError("Please enter Nro Guardia or select a guardia to delete");
+                showError("Please select a guardia to delete");
                 return;
             }
             

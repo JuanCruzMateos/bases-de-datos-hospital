@@ -152,7 +152,18 @@ public class PacientePanel extends JPanel {
         txtApellido.setText("");
         txtFechaNacimiento.setText("");
         cmbSexo.setSelectedIndex(0);
+
+        // Modo "alta": se puede editar documento
+        setIdentityEditable(true);
     }
+
+
+    // --- Control de edición de identidad (documento del paciente) ---
+    public void setIdentityEditable(boolean editable) {
+        txtTipoDocumento.setEditable(editable);
+        txtNroDocumento.setEditable(editable);
+    }
+
     
     public void updateTable(List<Paciente> pacientes) {
         tableModel.setRowCount(0);
@@ -191,8 +202,12 @@ public class PacientePanel extends JPanel {
             setApellido(p.getApellido());
             setFechaNacimiento(p.getFechaNacimiento().toString());
             setSexo(String.valueOf(p.getSexo()));
+
+            // Modo "edición": documento bloqueado
+            setIdentityEditable(false);
         }
     }
+
     
     // Button getters for controller
     public JButton getBtnCreate() { return btnCreate; }

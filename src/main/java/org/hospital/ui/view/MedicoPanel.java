@@ -40,7 +40,7 @@ public class MedicoPanel extends JPanel {
     private JButton btnRefresh;
     private JButton btnClear;
     
-    // Current medico's especialidades (cod_especialidad -> descripcion)
+    // Medico especialidades (cod_especialidad -> descripcion)
     private Set<Especialidad> currentEspecialidades = new HashSet<>();
     
     public MedicoPanel() {
@@ -256,7 +256,19 @@ public class MedicoPanel extends JPanel {
         txtPeriodoVacaciones.setText("");
         especialidadesModel.clear();
         currentEspecialidades.clear();
+
+        // Modo "alta": se puede editar identidad
+        setIdentityEditable(true);
     }
+
+
+    // --- Control de edición de identidad (matrícula + documento) ---
+    public void setIdentityEditable(boolean editable) {
+        txtMatricula.setEditable(editable);
+        txtTipoDocumento.setEditable(editable);
+        txtNroDocumento.setEditable(editable);
+    }
+
     
     public void updateTable(List<Medico> medicos) {
         tableModel.setRowCount(0);

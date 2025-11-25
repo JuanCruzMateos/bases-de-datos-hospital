@@ -36,6 +36,13 @@ public class GuardiaDaoImpl implements GuardiaDao {
             "id_turno = ? WHERE nro_guardia = ?";
     private static final String DELETE_SQL = 
             "DELETE FROM GUARDIA WHERE nro_guardia = ?";
+    private static final String COUNT_BY_MEDICO_AND_MONTH_SQL =
+            "SELECT COUNT(*) " +
+            "FROM GUARDIA " +
+            "WHERE matricula = ? " +
+            "  AND EXTRACT(YEAR FROM fecha_hora) = ? " +
+            "  AND EXTRACT(MONTH FROM fecha_hora) = ?";
+
 
     @Override
     public Guardia create(Guardia guardia) throws DataAccessException {
@@ -320,4 +327,40 @@ public class GuardiaDaoImpl implements GuardiaDao {
             throw new IllegalArgumentException("fechaHora must not be null");
         }
     }
+
+    @Override
+    public int countGuardiasByMedicoAndMonth(long matricula, int year, int month)
+            throws DataAccessException {
+
+        Connection connection = null;
+        try {
+            connection = DatabaseConfig.getConnection();
+            try (PreparedStatement stmt = connection.prepareStatement(COUNT_BY_MEDICO_AND_MONTH_SQL)) {
+                stmt.setLong(1, matricula);
+                stmt.setInt(2, year);
+                stmt.setInt(3, month);
+
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getInt(1);
+                    }
+                    return 0;
+                }
+            }
+        } catch (SQLException e) {
+            logger.severe("Error counting guardias for medico=" + matricula +
+                        ", year=" + year + ", month=" + month + ": " + e.getMessage());
+            throw new DataAccessException("Error contando guardias del médico", e);
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    logger.warning("Failed to close connection: " + e.getMessage());
+                }
+            }
+        }
+    }
+
+
 }
