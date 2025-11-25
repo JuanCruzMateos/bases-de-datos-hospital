@@ -1,7 +1,10 @@
 package org.hospital.paciente;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import org.hospital.exception.DataAccessException;
@@ -32,6 +35,24 @@ public class PacienteService {
         this(new PacienteDaoImpl());
     }
 
+    private static final Set<String> TIPOS_DOCUMENTO_VALIDOS = 
+            new HashSet<>(Arrays.asList("DNI", "LC", "PASAPORTE"));
+
+    private void validateTipoDocumento(String tipoDocumento) {
+        if (tipoDocumento == null || tipoDocumento.trim().isEmpty()) {
+            throw new IllegalArgumentException("El tipo de documento es obligatorio.");
+        }
+
+        String normalizado = tipoDocumento.trim().toUpperCase();
+
+        if (!TIPOS_DOCUMENTO_VALIDOS.contains(normalizado)) {
+            throw new IllegalArgumentException(
+                "Tipo de documento inválido. Debe ser DNI, LC o PASAPORTE."
+            );
+        }
+    }
+
+
     /**
      * Create a new paciente with business logic validation.
      * 
@@ -43,6 +64,9 @@ public class PacienteService {
     public Paciente createPaciente(Paciente paciente) throws DataAccessException {
         logger.info("Service: Creating new paciente");
         
+        validateTipoDocumento(paciente.getTipoDocumento());
+        paciente.setTipoDocumento(paciente.getTipoDocumento().trim().toUpperCase());
+
         // Business logic validations
         validatePacienteBusinessRules(paciente);
         
@@ -92,6 +116,9 @@ public class PacienteService {
     public Paciente updatePaciente(Paciente paciente) throws DataAccessException {
         logger.info("Service: Updating paciente");
         
+        validateTipoDocumento(paciente.getTipoDocumento());
+        paciente.setTipoDocumento(paciente.getTipoDocumento().trim().toUpperCase());
+
         // Business logic validations
         validatePacienteBusinessRules(paciente);
         

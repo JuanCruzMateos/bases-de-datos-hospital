@@ -53,7 +53,15 @@ public class MedicoDaoImpl implements MedicoDao {
             "SELECT COUNT(*) FROM PACIENTE WHERE tipo_documento = ? AND nro_documento = ?";
     private static final String COUNT_MEDICO_BY_DOC_SQL =
             "SELECT COUNT(*) FROM MEDICO WHERE tipo_documento = ? AND nro_documento = ?";
+    private static final String SELECT_ESPECIALIDADES_CODIGOS_SQL =
+            "SELECT cod_especialidad FROM SE_ESPECIALIZA_EN WHERE matricula = ?";
+    // Borrar una sola especialidad puntual del médico
+    private static final String DELETE_ESPECIALIDAD_SQL =
+            "DELETE FROM SE_ESPECIALIZA_EN WHERE matricula = ? AND cod_especialidad = ?";
 
+    // Contar guardias asociadas a una combinación (matricula, cod_especialidad)
+    private static final String COUNT_GUARDIA_BY_MEDICO_AND_ESPECIALIDAD_SQL =
+            "SELECT COUNT(*) FROM GUARDIA WHERE matricula = ? AND cod_especialidad = ?";
 
     @Override
     public Medico create(Medico medico) throws DataAccessException {
@@ -210,12 +218,13 @@ public class MedicoDaoImpl implements MedicoDao {
     public Medico update(Medico medico) throws DataAccessException {
         logger.info("Updating medico: " + medico.getMatricula());
         validateMedico(medico);
+
         Connection connection = null;
         try {
             connection = DatabaseConfig.getConnection();
             connection.setAutoCommit(false);
-            
-            // Update PERSONA table first
+
+            // 1) Actualizar PERSONA
             try (PreparedStatement personaStmt = connection.prepareStatement(UPDATE_PERSONA_SQL)) {
                 personaStmt.setString(1, medico.getNombre());
                 personaStmt.setString(2, medico.getApellido());
@@ -224,8 +233,8 @@ public class MedicoDaoImpl implements MedicoDao {
                 personaStmt.setString(5, medico.getNroDocumento());
                 personaStmt.executeUpdate();
             }
-            
-            // Then update MEDICO table
+
+            // 2) Actualizar MEDICO
             try (PreparedStatement medicoStmt = connection.prepareStatement(UPDATE_MEDICO_SQL)) {
                 medicoStmt.setString(1, medico.getCuilCuit());
                 medicoStmt.setDate(2, toSqlDate(medico.getFechaIngreso()));
@@ -240,25 +249,69 @@ public class MedicoDaoImpl implements MedicoDao {
                 medicoStmt.executeUpdate();
             }
 
-            // Update SE_ESPECIALIZA_EN table - delete all and re-insert
-            try (PreparedStatement deleteStmt = connection.prepareStatement(DELETE_ALL_ESPECIALIDADES_SQL)) {
-                deleteStmt.setLong(1, medico.getMatricula());
-                deleteStmt.executeUpdate();
+            // 3) Actualizar SE_ESPECIALIZA_EN de forma conservadora
+
+            // 3.a) Especialidades actuales en BD
+            Set<Integer> actuales = getEspecialidadesCodigos(medico.getMatricula(), connection);
+
+            // 3.b) Especialidades nuevas desde el formulario
+            Set<Integer> nuevas = new HashSet<>();
+            if (medico.getEspecialidades() != null) {
+                for (Especialidad esp : medico.getEspecialidades()) {
+                    nuevas.add(esp.getCodEspecialidad());
+                }
             }
-            
-            if (medico.getEspecialidades() != null && !medico.getEspecialidades().isEmpty()) {
+
+            // 3.c) Diferencias
+            Set<Integer> aAgregar = new HashSet<>(nuevas);
+            aAgregar.removeAll(actuales);     // en nuevas pero no en actuales
+
+            Set<Integer> aQuitar = new HashSet<>(actuales);
+            aQuitar.removeAll(nuevas);        // estaban antes y ahora desaparecieron
+
+            // 3.d) Insertar solo las nuevas
+            if (!aAgregar.isEmpty()) {
                 try (PreparedStatement insertStmt = connection.prepareStatement(INSERT_ESPECIALIDAD_SQL)) {
-                    for (Especialidad especialidad : medico.getEspecialidades()) {
+                    for (Integer codEsp : aAgregar) {
                         insertStmt.setLong(1, medico.getMatricula());
-                        insertStmt.setInt(2, especialidad.getCodEspecialidad());
+                        insertStmt.setInt(2, codEsp);
                         insertStmt.executeUpdate();
                     }
                 }
             }
-            
+
+            // 3.e) Quitar solo las que no tengan guardias asociadas
+            if (!aQuitar.isEmpty()) {
+                for (Integer codEsp : aQuitar) {
+
+                    if (hasGuardiasForEspecialidad(medico.getMatricula(), codEsp, connection)) {
+                        // Deshacemos todo el update del médico
+                        try {
+                            connection.rollback();
+                        } catch (SQLException ex) {
+                            logger.severe("Failed to rollback transaction after guardia check: " + ex.getMessage());
+                        }
+
+                        throw new IllegalArgumentException(
+                            "No se puede quitar la especialidad con código " + codEsp +
+                            " del médico " + medico.getMatricula() +
+                            " porque tiene guardias asociadas a esa especialidad."
+                        );
+                    }
+
+                    try (PreparedStatement deleteStmt = connection.prepareStatement(DELETE_ESPECIALIDAD_SQL)) {
+                        deleteStmt.setLong(1, medico.getMatricula());
+                        deleteStmt.setInt(2, codEsp);
+                        deleteStmt.executeUpdate();
+                    }
+                }
+            }
+
+            // 4) Confirmar transacción
             connection.commit();
             logger.info("Successfully updated medico: " + medico.getMatricula());
             return medico;
+
         } catch (SQLException e) {
             if (connection != null) {
                 try {
@@ -280,6 +333,7 @@ public class MedicoDaoImpl implements MedicoDao {
             }
         }
     }
+
 
     @Override
     public boolean delete(long matricula) throws DataAccessException {
@@ -446,6 +500,40 @@ public class MedicoDaoImpl implements MedicoDao {
             throw new DataAccessException("Error retrieving especialidades for medico", e);
         }
     }  
+
+    /**
+     * Devuelve el conjunto de códigos de especialidad que el médico
+     * tiene actualmente registrados en SE_ESPECIALIZA_EN.
+     */
+    private Set<Integer> getEspecialidadesCodigos(long matricula, Connection connection) throws SQLException {
+        Set<Integer> codigos = new HashSet<>();
+        try (PreparedStatement stmt = connection.prepareStatement(SELECT_ESPECIALIDADES_CODIGOS_SQL)) {
+            stmt.setLong(1, matricula);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    codigos.add(rs.getInt("cod_especialidad"));
+                }
+            }
+        }
+        return codigos;
+    }
+
+    /**
+     * Indica si el médico tiene al menos una guardia registrada
+     * para una especialidad dada.
+     */
+    private boolean hasGuardiasForEspecialidad(long matricula, int codEspecialidad, Connection connection) throws SQLException {
+        try (PreparedStatement stmt = connection.prepareStatement(COUNT_GUARDIA_BY_MEDICO_AND_ESPECIALIDAD_SQL)) {
+            stmt.setLong(1, matricula);
+            stmt.setInt(2, codEspecialidad);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+                return false;
+            }
+        }
+    }
 
     private void validateMedico(Medico medico) {
         if (medico == null) {

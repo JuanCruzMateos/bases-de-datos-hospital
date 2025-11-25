@@ -11,7 +11,9 @@ CREATE TABLE PERSONA (
     nombre         VARCHAR2(100) NOT NULL,
     apellido       VARCHAR2(100) NOT NULL,
     tipo           VARCHAR2(50)  NOT NULL,
-    CONSTRAINT pk_persona PRIMARY KEY (tipo_documento, nro_documento)
+    CONSTRAINT pk_persona PRIMARY KEY (tipo_documento, nro_documento),
+    CONSTRAINT chk_persona_tipo_documento
+        CHECK (UPPER(tipo_documento) IN ('DNI', 'LC', 'PASAPORTE'))
 );
 
 -- Paciente(*tipo_documento*, *nro_documento*, fecha_nacimiento, sexo)

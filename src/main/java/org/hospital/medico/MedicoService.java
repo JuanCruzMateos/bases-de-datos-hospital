@@ -5,6 +5,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 
 import org.hospital.exception.DataAccessException;
 
@@ -25,12 +29,34 @@ public class MedicoService {
         this(new MedicoDaoImpl(), new EspecialidadDaoImpl());
     }
 
+    private static final Set<String> TIPOS_DOCUMENTO_VALIDOS = 
+            new HashSet<>(Arrays.asList("DNI", "LC", "PASAPORTE"));
+
+    private void validateTipoDocumento(String tipoDocumento) {
+        if (tipoDocumento == null || tipoDocumento.trim().isEmpty()) {
+            throw new IllegalArgumentException("El tipo de documento es obligatorio.");
+        }
+
+        String normalizado = tipoDocumento.trim().toUpperCase();
+
+        if (!TIPOS_DOCUMENTO_VALIDOS.contains(normalizado)) {
+            throw new IllegalArgumentException(
+                "Tipo de documento inválido. Debe ser DNI, LC o PASAPORTE."
+            );
+        }
+    }
+
+
     /**
      * Create a new medico with business logic validation.
      */
     public Medico createMedico(Medico medico) throws DataAccessException {
         logger.info("Service: Creating new medico with matricula: " + medico.getMatricula());
         
+        // Normalizamos y validamos tipo doc
+        validateTipoDocumento(medico.getTipoDocumento());
+        medico.setTipoDocumento(medico.getTipoDocumento().trim().toUpperCase());
+
         validateMedicoBusinessRules(medico);
         
         // Check for duplicate matricula
@@ -64,6 +90,10 @@ public class MedicoService {
     public Medico updateMedico(Medico medico) throws DataAccessException {
         logger.info("Service: Updating medico with matricula: " + medico.getMatricula());
         
+        validateTipoDocumento(medico.getTipoDocumento());
+        medico.setTipoDocumento(medico.getTipoDocumento().trim().toUpperCase());
+
+
         validateMedicoBusinessRules(medico);
         
         // Verify medico exists
