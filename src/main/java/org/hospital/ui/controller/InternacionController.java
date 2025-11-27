@@ -7,7 +7,6 @@ import org.hospital.exception.DataAccessException;
 import org.hospital.internacion.Internacion;
 import org.hospital.internacion.InternacionService;
 import org.hospital.ui.view.InternacionPanel;
-import java.util.List;
 import org.hospital.internacion.SeUbica;
 
 

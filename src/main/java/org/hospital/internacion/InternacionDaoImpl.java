@@ -18,39 +18,38 @@ import org.hospital.exception.DataAccessException;
 
 public class InternacionDaoImpl implements InternacionDao {
     private static final Logger logger = Logger.getLogger(InternacionDaoImpl.class.getName());
-    private static final String INSERT_SQL = 
-            "INSERT INTO INTERNACION (fecha_inicio, fecha_fin, tipo_documento, nro_documento, matricula) " +
-            "VALUES (?, ?, ?, ?, ?)";
-    private static final String SELECT_BY_ID_SQL = 
-            "SELECT nro_internacion, fecha_inicio, fecha_fin, tipo_documento, nro_documento, matricula " +
+    // private static final String INSERT_SQL = "INSERT INTO INTERNACION (fecha_inicio, fecha_fin, tipo_documento, nro_documento, matricula) "
+            // +
+            // "VALUES (?, ?, ?, ?, ?)";
+    private static final String SELECT_BY_ID_SQL = "SELECT nro_internacion, fecha_inicio, fecha_fin, tipo_documento, nro_documento, matricula "
+            +
             "FROM INTERNACION WHERE nro_internacion = ?";
-    private static final String SELECT_ALL_SQL = 
-            "SELECT nro_internacion, fecha_inicio, fecha_fin, tipo_documento, nro_documento, matricula " +
+    private static final String SELECT_ALL_SQL = "SELECT nro_internacion, fecha_inicio, fecha_fin, tipo_documento, nro_documento, matricula "
+            +
             "FROM INTERNACION ORDER BY fecha_inicio DESC";
-    private static final String SELECT_BY_PACIENTE_SQL = 
-            "SELECT nro_internacion, fecha_inicio, fecha_fin, tipo_documento, nro_documento, matricula " +
+    private static final String SELECT_BY_PACIENTE_SQL = "SELECT nro_internacion, fecha_inicio, fecha_fin, tipo_documento, nro_documento, matricula "
+            +
             "FROM INTERNACION WHERE tipo_documento = ? AND nro_documento = ? ORDER BY fecha_inicio DESC";
-    private static final String SELECT_ACTIVAS_SQL = 
-            "SELECT nro_internacion, fecha_inicio, fecha_fin, tipo_documento, nro_documento, matricula " +
+    private static final String SELECT_ACTIVAS_SQL = "SELECT nro_internacion, fecha_inicio, fecha_fin, tipo_documento, nro_documento, matricula "
+            +
             "FROM INTERNACION WHERE fecha_fin IS NULL ORDER BY fecha_inicio DESC";
-    private static final String UPDATE_SQL = 
-            "UPDATE INTERNACION SET fecha_inicio = ?, fecha_fin = ?, tipo_documento = ?, " +
+    private static final String UPDATE_SQL = "UPDATE INTERNACION SET fecha_inicio = ?, fecha_fin = ?, tipo_documento = ?, "
+            +
             "nro_documento = ?, matricula = ? WHERE nro_internacion = ?";
-    private static final String DELETE_SQL = 
-            "DELETE FROM INTERNACION WHERE nro_internacion = ?";
+    private static final String DELETE_SQL = "DELETE FROM INTERNACION WHERE nro_internacion = ?";
 
     @Override
     public Internacion create(Internacion internacion) throws DataAccessException {
-        // Compatibilidad para el código viejo 
+        // Compatibilidad para el código viejo
         return create(internacion, null, null);
     }
 
     @Override
     public Internacion create(Internacion internacion,
-                            Integer nroHabitacion,
-                            Integer nroCama) throws DataAccessException {
+            Integer nroHabitacion,
+            Integer nroCama) throws DataAccessException {
         logger.info("Creating internacion via sp_crear_internacion: paciente=" +
-                    internacion.getTipoDocumento() + "/" + internacion.getNroDocumento());
+                internacion.getTipoDocumento() + "/" + internacion.getNroDocumento());
         validateInternacion(internacion);
 
         Connection connection = null;
@@ -202,7 +201,7 @@ public class InternacionDaoImpl implements InternacionDao {
         try {
             connection = DatabaseConfig.getConnection();
             try (PreparedStatement statement = connection.prepareStatement(SELECT_ALL_SQL);
-                 ResultSet resultSet = statement.executeQuery()) {
+                    ResultSet resultSet = statement.executeQuery()) {
                 List<Internacion> internaciones = new ArrayList<>();
                 while (resultSet.next()) {
                     internaciones.add(mapToInternacion(resultSet));
@@ -225,7 +224,7 @@ public class InternacionDaoImpl implements InternacionDao {
     }
 
     @Override
-    public List<Internacion> findByPaciente(String tipoDocumento, String nroDocumento) 
+    public List<Internacion> findByPaciente(String tipoDocumento, String nroDocumento)
             throws DataAccessException {
         logger.fine("Finding internaciones by paciente: " + tipoDocumento + "/" + nroDocumento);
         Connection connection = null;
@@ -263,7 +262,7 @@ public class InternacionDaoImpl implements InternacionDao {
         try {
             connection = DatabaseConfig.getConnection();
             try (PreparedStatement statement = connection.prepareStatement(SELECT_ACTIVAS_SQL);
-                 ResultSet resultSet = statement.executeQuery()) {
+                    ResultSet resultSet = statement.executeQuery()) {
                 List<Internacion> internaciones = new ArrayList<>();
                 while (resultSet.next()) {
                     internaciones.add(mapToInternacion(resultSet));
@@ -292,7 +291,7 @@ public class InternacionDaoImpl implements InternacionDao {
         try {
             connection = DatabaseConfig.getConnection();
             connection.setAutoCommit(false);
-            
+
             try (PreparedStatement statement = connection.prepareStatement(UPDATE_SQL)) {
                 statement.setDate(1, toSqlDate(internacion.getFechaInicio()));
                 if (internacion.getFechaFin() != null) {
@@ -309,7 +308,7 @@ public class InternacionDaoImpl implements InternacionDao {
                     throw new DataAccessException("Internacion not found with nro: " + internacion.getNroInternacion());
                 }
             }
-            
+
             connection.commit();
             logger.info("Successfully updated internacion: " + internacion.getNroInternacion());
             return internacion;
@@ -342,7 +341,7 @@ public class InternacionDaoImpl implements InternacionDao {
         try {
             connection = DatabaseConfig.getConnection();
             connection.setAutoCommit(false);
-            
+
             try (PreparedStatement statement = connection.prepareStatement(DELETE_SQL)) {
                 statement.setInt(1, nroInternacion);
                 int rowsAffected = statement.executeUpdate();
@@ -385,8 +384,7 @@ public class InternacionDaoImpl implements InternacionDao {
                 toLocalDate(resultSet.getDate("fecha_fin")),
                 resultSet.getString("tipo_documento"),
                 resultSet.getString("nro_documento"),
-                resultSet.getLong("matricula")
-        );
+                resultSet.getLong("matricula"));
     }
 
     private LocalDate toLocalDate(Date date) {
@@ -410,8 +408,8 @@ public class InternacionDaoImpl implements InternacionDao {
         if (internacion.getNroDocumento() == null) {
             throw new IllegalArgumentException("nroDocumento must not be null");
         }
-        if (internacion.getFechaFin() != null && 
-            internacion.getFechaInicio().isAfter(internacion.getFechaFin())) {
+        if (internacion.getFechaFin() != null &&
+                internacion.getFechaInicio().isAfter(internacion.getFechaFin())) {
             throw new IllegalArgumentException("fechaInicio must be before or equal to fechaFin");
         }
     }
