@@ -166,7 +166,7 @@ Medico.matriculal puede no estar en Recorrido.matricula
 
 ---
 
-## Comenta\_Sobre(*idRecorrido, nroInternacion*, comentario)  
+### Comenta\_Sobre(*idRecorrido, nroInternacion*, comentario)  
 CK \= PK \= {(idRecorrido, nroInternacion)}  
 FK \= {idRecorrido, nroInternacion}
 
@@ -201,6 +201,11 @@ Atiende.codEspecialidad debe estar en Especialidad.codEspecialidad
 Atiende.idTurno debe estar en Turno.idTurno  
 Especialidad.codEspecialidad debe estar en Atiende.codEspecialidad  
 Turno.idTurno puede no estar en Atiende.idTurno
+
+---
+
+### Vacaciones()
+
 
 # Formas Normales
 

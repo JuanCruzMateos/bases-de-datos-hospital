@@ -20,6 +20,4 @@ ALTER SESSION SET CURRENT_SCHEMA = hospital;
 @/opt/oracle/scripts/procedures/sp_camas_disponibles.sql
 @/opt/oracle/scripts/procedures/sp_comentarios_visitas.sql
 @/opt/oracle/scripts/procedures/sp_auditoria_guardias.sql
-
-
-
+@/opt/oracle/scripts/procedures/sp_vacaciones.sql

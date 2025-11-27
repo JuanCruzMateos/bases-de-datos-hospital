@@ -21,7 +21,7 @@
 -- - Maneja conflictos de serializacion ORA-08177 (se recomienda reintentar)
 -- =========================================================
 
-SET SERVEROUTPUT ON;
+-- SET SERVEROUTPUT ON;
 
 ALTER SESSION SET CONTAINER = FREEPDB1;
 ALTER SESSION SET CURRENT_SCHEMA = hospital;
@@ -38,9 +38,16 @@ BEGIN
     -- Inicia la transaccion con nivel SERIALIZABLE
     -- Previene condiciones de carrera entre las validaciones y el INSERT
     SAVEPOINT inicio_transaccion;
+    -- Start transaction con isolation SERIALIZABLE
+    -- Esto previene Dirty Reads, Non-Repeatable Reads y Phantom Records
+    -- Default es READ COMMITTED (otras alternativas son: READ UNCOMMITTED, REPEATABLE READ)
+    SAVEPOINT inicio_transaccion; -- savepoint para rollback parcial
     SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+    
+    -- Lock GUARDIA : el resto puede leer pero no modificar
+    LOCK TABLE GUARDIA IN SHARE ROW EXCLUSIVE MODE;
 
-    -- 1. Validar rango de fechas
+    -- 1. Validate que el rango de fechas es valido
     IF v_fecha_inicio > v_fecha_fin THEN
         RAISE_APPLICATION_ERROR(
             -20099,
@@ -56,7 +63,7 @@ BEGIN
         );
     END IF;
 
-    -- 2. Validar que el medico exista
+    -- 2. Validate que el medico existe
     SELECT COUNT(*)
     INTO v_medico_existe
     FROM MEDICO
@@ -69,8 +76,8 @@ BEGIN
         );
     END IF;
     
-    -- 3. Revisar vacaciones solapadas para el mismo medico
-    -- Dos periodos se solapan si: inicio1 < fin2 Y inicio2 < fin1
+    -- 3. Check para prevenir que un medico tenga vacaciones que se solapen con el periodo solicitado
+    -- Dos periodos se solapan si: start1 < end2 AND start2 < end1
     SELECT COUNT(*)
     INTO v_vacaciones_solapadas
     FROM VACACIONES
@@ -86,8 +93,8 @@ BEGIN
         );
     END IF;
     
-    -- 4. Revisar conflictos de guardias (Restriccion #11)
-    -- Un medico no puede estar de guardia si esta de vacaciones ese dia
+    -- 4. Check para prevenir que un medico esté en guardia durante su periodo de vacaciones
+    -- Un medico no puede estar en guardia durante su periodo de vacaciones
     SELECT COUNT(*)
     INTO v_guardias_conflicto
     FROM GUARDIA

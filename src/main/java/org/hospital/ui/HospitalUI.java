@@ -22,6 +22,7 @@ public class HospitalUI extends JFrame {
     private CamaDisponiblePanel camaDisponiblePanel;
     private VisitasMedicasPanel visitasMedicasPanel;
     private AuditoriaGuardiasPanel auditoriaGuardiasPanel;
+    private VacacionesPanel vacacionesPanel;
     
     // Controllers - stored as fields to prevent garbage collection
     // Controllers manage listeners and must remain in scope
@@ -44,6 +45,8 @@ public class HospitalUI extends JFrame {
     private VisitasMedicasController visitasMedicasController;
     @SuppressWarnings("unused")
     private AuditoriaGuardiasController auditoriaGuardiasController;
+    @SuppressWarnings("unused")
+    private VacacionesController vacacionesController;
     
     public HospitalUI() {
         initializeUI();
@@ -83,12 +86,14 @@ public class HospitalUI extends JFrame {
         camaDisponiblePanel = new CamaDisponiblePanel();
         visitasMedicasPanel = new VisitasMedicasPanel();
         auditoriaGuardiasPanel = new AuditoriaGuardiasPanel();
+        vacacionesPanel = new VacacionesPanel();
         
         // Add tabs
         tabbedPane.addTab("Camas Disponibles", new ImageIcon(), camaDisponiblePanel, "View Available Beds Reports");
         tabbedPane.addTab("Visitas Médicas", new ImageIcon(), visitasMedicasPanel, "View Patient Internations & Visit Comments");
         tabbedPane.addTab("Auditoría Guardias", new ImageIcon(), auditoriaGuardiasPanel, "View Guard Assignment Audit Trail");
         tabbedPane.addTab("Guardias", new ImageIcon(), guardiaPanel, "Manage Guard Shifts");
+        tabbedPane.addTab("Vacaciones", new ImageIcon(), vacacionesPanel, "Manage Doctor Vacations");
         tabbedPane.addTab("Pacientes", new ImageIcon(), pacientePanel, "Manage Patients");
         tabbedPane.addTab("Medicos", new ImageIcon(), medicoPanel, "Manage Doctors & Specialties");
         tabbedPane.addTab("Sectores", new ImageIcon(), sectorPanel, "Manage Sectors");
@@ -152,6 +157,7 @@ public class HospitalUI extends JFrame {
         camaDisponibleController = new CamaDisponibleController(camaDisponiblePanel);
         visitasMedicasController = new VisitasMedicasController(visitasMedicasPanel);
         auditoriaGuardiasController = new AuditoriaGuardiasController(auditoriaGuardiasPanel);
+        vacacionesController = new VacacionesController(vacacionesPanel);
     }
     
     /**
