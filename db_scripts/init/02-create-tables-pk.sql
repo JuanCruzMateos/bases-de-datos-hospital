@@ -25,14 +25,13 @@ CREATE TABLE PACIENTE (
     CONSTRAINT pk_paciente PRIMARY KEY (tipo_documento, nro_documento)
 );
 
--- Medico(matricula, cuilcuit, fecha_ingreso, foto, max_cant_guardia, periodo_vacaciones, *tipo_documento, nro_documento*)
+-- Medico(matricula, cuilcuit, fecha_ingreso, foto, max_cant_guardia, *tipo_documento, nro_documento*)
 CREATE TABLE MEDICO (
     matricula          NUMBER(10)   PRIMARY KEY,
     cuil_cuit          VARCHAR2(20) NOT NULL UNIQUE,
     fecha_ingreso      DATE NOT NULL,
     foto               BLOB,
     max_cant_guardia   NUMBER(5)    DEFAULT 0 NOT NULL,
-    periodo_vacaciones VARCHAR2(50),
     tipo_documento     VARCHAR2(10) NOT NULL,
     nro_documento      VARCHAR2(20) NOT NULL
 );
@@ -145,6 +144,14 @@ CREATE TABLE ATIENDE (
     cod_especialidad NUMBER(10) NOT NULL,
     id_turno         NUMBER(10) NOT NULL,
     CONSTRAINT pk_atiende PRIMARY KEY (cod_especialidad, id_turno)
+);
+
+-- Creamos una nueva tabla para vacaciones de medicos
+CREATE TABLE VACACIONES (
+    matricula         NUMBER(10) NOT NULL,
+    fecha_inicio      DATE NOT NULL,
+    fecha_fin         DATE NOT NULL,
+    CONSTRAINT pk_vacaciones PRIMARY KEY (matricula, fecha_inicio, fecha_fin)
 );
 
 -- Necesitamos una tabla de auditoria para las modificaciones en las guardias

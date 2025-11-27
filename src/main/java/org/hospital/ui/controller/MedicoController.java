@@ -105,7 +105,6 @@ public class MedicoController extends BaseController {
         view.setCuilCuit(currentMedico.getCuilCuit());
         view.setFechaIngreso(currentMedico.getFechaIngreso() != null ? currentMedico.getFechaIngreso().toString() : "");
         view.setMaxCantGuardia(String.valueOf(currentMedico.getMaxCantGuardia()));
-        view.setPeriodoVacaciones(currentMedico.getPeriodoVacaciones());
         view.setFotoBytes(currentMedico.getFoto());
 
         // Cargar especialidades
@@ -147,7 +146,6 @@ public class MedicoController extends BaseController {
                 fechaIngreso,
                 view.getFotoBytes(),
                 maxCantGuardia,
-                view.getPeriodoVacaciones(),
                 view.getCurrentEspecialidades()
             );
             
@@ -202,7 +200,6 @@ public class MedicoController extends BaseController {
                 fechaIngreso,
                 view.getFotoBytes(),
                 maxCantGuardia,
-                view.getPeriodoVacaciones(),
                 view.getCurrentEspecialidades()
             );
             

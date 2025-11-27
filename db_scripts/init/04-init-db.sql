@@ -84,14 +84,14 @@ SELECT 1 FROM dual;
 -- 5. MEDICO
 -- ==============================================
 INSERT ALL
-    INTO MEDICO (matricula, cuil_cuit, fecha_ingreso, foto, max_cant_guardia, periodo_vacaciones, tipo_documento, nro_documento) VALUES (1001, '20-25123456-3', TO_DATE('2015-03-01', 'YYYY-MM-DD'), NULL, 6, 'Enero', 'DNI', '25123456')
-    INTO MEDICO (matricula, cuil_cuit, fecha_ingreso, foto, max_cant_guardia, periodo_vacaciones, tipo_documento, nro_documento) VALUES (1002, '27-27234567-4', TO_DATE('2016-07-15', 'YYYY-MM-DD'), NULL, 8, 'Febrero', 'DNI', '27234567')
-    INTO MEDICO (matricula, cuil_cuit, fecha_ingreso, foto, max_cant_guardia, periodo_vacaciones, tipo_documento, nro_documento) VALUES (1003, '20-26345678-5', TO_DATE('2017-02-10', 'YYYY-MM-DD'), NULL, 6, 'Marzo', 'DNI', '26345678')
-    INTO MEDICO (matricula, cuil_cuit, fecha_ingreso, foto, max_cant_guardia, periodo_vacaciones, tipo_documento, nro_documento) VALUES (1004, '27-28456789-6', TO_DATE('2018-05-20', 'YYYY-MM-DD'), NULL, 7, 'Abril', 'DNI', '28456789')
-    INTO MEDICO (matricula, cuil_cuit, fecha_ingreso, foto, max_cant_guardia, periodo_vacaciones, tipo_documento, nro_documento) VALUES (1005, '20-24567890-7', TO_DATE('2014-09-01', 'YYYY-MM-DD'), NULL, 5, 'Mayo', 'DNI', '24567890')
-    INTO MEDICO (matricula, cuil_cuit, fecha_ingreso, foto, max_cant_guardia, periodo_vacaciones, tipo_documento, nro_documento) VALUES (1006, '27-29234567-8', TO_DATE('2019-01-15', 'YYYY-MM-DD'), NULL, 8, 'Junio', 'DNI', '29234567')
-    INTO MEDICO (matricula, cuil_cuit, fecha_ingreso, foto, max_cant_guardia, periodo_vacaciones, tipo_documento, nro_documento) VALUES (1007, '20-27890123-9', TO_DATE('2016-11-10', 'YYYY-MM-DD'), NULL, 6, 'Julio', 'DNI', '27890123')
-    INTO MEDICO (matricula, cuil_cuit, fecha_ingreso, foto, max_cant_guardia, periodo_vacaciones, tipo_documento, nro_documento) VALUES (1008, '27-26789012-0', TO_DATE('2020-03-05', 'YYYY-MM-DD'), NULL, 7, 'Agosto', 'DNI', '26789012')
+    INTO MEDICO (matricula, cuil_cuit, fecha_ingreso, foto, max_cant_guardia, tipo_documento, nro_documento) VALUES (1001, '20-25123456-3', TO_DATE('2015-03-01', 'YYYY-MM-DD'), NULL, 6, 'DNI', '25123456')
+    INTO MEDICO (matricula, cuil_cuit, fecha_ingreso, foto, max_cant_guardia, tipo_documento, nro_documento) VALUES (1002, '27-27234567-4', TO_DATE('2016-07-15', 'YYYY-MM-DD'), NULL, 8, 'DNI', '27234567')
+    INTO MEDICO (matricula, cuil_cuit, fecha_ingreso, foto, max_cant_guardia, tipo_documento, nro_documento) VALUES (1003, '20-26345678-5', TO_DATE('2017-02-10', 'YYYY-MM-DD'), NULL, 6, 'DNI', '26345678')
+    INTO MEDICO (matricula, cuil_cuit, fecha_ingreso, foto, max_cant_guardia, tipo_documento, nro_documento) VALUES (1004, '27-28456789-6', TO_DATE('2018-05-20', 'YYYY-MM-DD'), NULL, 7, 'DNI', '28456789')
+    INTO MEDICO (matricula, cuil_cuit, fecha_ingreso, foto, max_cant_guardia, tipo_documento, nro_documento) VALUES (1005, '20-24567890-7', TO_DATE('2014-09-01', 'YYYY-MM-DD'), NULL, 5, 'DNI', '24567890')
+    INTO MEDICO (matricula, cuil_cuit, fecha_ingreso, foto, max_cant_guardia, tipo_documento, nro_documento) VALUES (1006, '27-29234567-8', TO_DATE('2019-01-15', 'YYYY-MM-DD'), NULL, 8, 'DNI', '29234567')
+    INTO MEDICO (matricula, cuil_cuit, fecha_ingreso, foto, max_cant_guardia, tipo_documento, nro_documento) VALUES (1007, '20-27890123-9', TO_DATE('2016-11-10', 'YYYY-MM-DD'), NULL, 6, 'DNI', '27890123')
+    INTO MEDICO (matricula, cuil_cuit, fecha_ingreso, foto, max_cant_guardia, tipo_documento, nro_documento) VALUES (1008, '27-26789012-0', TO_DATE('2020-03-05', 'YYYY-MM-DD'), NULL, 7, 'DNI', '26789012')
 SELECT 1 FROM dual;
 
 -- ==============================================
@@ -326,6 +326,28 @@ INSERT ALL
     INTO GUARDIA (nro_guardia, fecha_hora, matricula, cod_especialidad, id_turno) VALUES (18, TO_TIMESTAMP('2024-11-07 13:00:00', 'YYYY-MM-DD HH24:MI:SS'), 1007, 701, 2)
     INTO GUARDIA (nro_guardia, fecha_hora, matricula, cod_especialidad, id_turno) VALUES (19, TO_TIMESTAMP('2024-11-08 07:00:00', 'YYYY-MM-DD HH24:MI:SS'), 1008, 101, 1)
     INTO GUARDIA (nro_guardia, fecha_hora, matricula, cod_especialidad, id_turno) VALUES (20, TO_TIMESTAMP('2024-11-08 13:00:00', 'YYYY-MM-DD HH24:MI:SS'), 1001, 101, 2)
+SELECT 1 FROM dual;
+
+-- ==============================================
+-- 18. VACACIONES (Vacaciones de los medicos)
+-- ==============================================
+INSERT ALL
+    INTO VACACIONES (matricula, fecha_inicio, fecha_fin) VALUES (1001, TO_DATE('2025-01-01', 'YYYY-MM-DD'), TO_DATE('2025-01-31', 'YYYY-MM-DD'))
+    INTO VACACIONES (matricula, fecha_inicio, fecha_fin) VALUES (1002, TO_DATE('2025-02-01', 'YYYY-MM-DD'), TO_DATE('2025-02-28', 'YYYY-MM-DD'))
+    INTO VACACIONES (matricula, fecha_inicio, fecha_fin) VALUES (1003, TO_DATE('2025-03-01', 'YYYY-MM-DD'), TO_DATE('2025-03-31', 'YYYY-MM-DD'))
+    INTO VACACIONES (matricula, fecha_inicio, fecha_fin) VALUES (1004, TO_DATE('2025-04-01', 'YYYY-MM-DD'), TO_DATE('2025-04-30', 'YYYY-MM-DD'))
+    INTO VACACIONES (matricula, fecha_inicio, fecha_fin) VALUES (1005, TO_DATE('2025-05-01', 'YYYY-MM-DD'), TO_DATE('2025-05-31', 'YYYY-MM-DD'))
+    INTO VACACIONES (matricula, fecha_inicio, fecha_fin) VALUES (1006, TO_DATE('2025-06-01', 'YYYY-MM-DD'), TO_DATE('2025-06-30', 'YYYY-MM-DD'))
+    INTO VACACIONES (matricula, fecha_inicio, fecha_fin) VALUES (1007, TO_DATE('2025-07-01', 'YYYY-MM-DD'), TO_DATE('2025-07-31', 'YYYY-MM-DD'))
+    INTO VACACIONES (matricula, fecha_inicio, fecha_fin) VALUES (1008, TO_DATE('2025-08-01', 'YYYY-MM-DD'), TO_DATE('2025-08-31', 'YYYY-MM-DD'))
+    INTO VACACIONES (matricula, fecha_inicio, fecha_fin) VALUES (1001, TO_DATE('2024-01-15', 'YYYY-MM-DD'), TO_DATE('2024-02-14', 'YYYY-MM-DD'))
+    INTO VACACIONES (matricula, fecha_inicio, fecha_fin) VALUES (1002, TO_DATE('2024-02-10', 'YYYY-MM-DD'), TO_DATE('2024-03-10', 'YYYY-MM-DD'))
+    INTO VACACIONES (matricula, fecha_inicio, fecha_fin) VALUES (1003, TO_DATE('2024-03-05', 'YYYY-MM-DD'), TO_DATE('2024-04-04', 'YYYY-MM-DD'))
+    INTO VACACIONES (matricula, fecha_inicio, fecha_fin) VALUES (1004, TO_DATE('2024-04-20', 'YYYY-MM-DD'), TO_DATE('2024-05-19', 'YYYY-MM-DD'))
+    INTO VACACIONES (matricula, fecha_inicio, fecha_fin) VALUES (1005, TO_DATE('2024-05-15', 'YYYY-MM-DD'), TO_DATE('2024-06-14', 'YYYY-MM-DD'))
+    INTO VACACIONES (matricula, fecha_inicio, fecha_fin) VALUES (1006, TO_DATE('2024-06-10', 'YYYY-MM-DD'), TO_DATE('2024-07-09', 'YYYY-MM-DD'))
+    INTO VACACIONES (matricula, fecha_inicio, fecha_fin) VALUES (1007, TO_DATE('2024-07-25', 'YYYY-MM-DD'), TO_DATE('2024-08-24', 'YYYY-MM-DD'))
+    INTO VACACIONES (matricula, fecha_inicio, fecha_fin) VALUES (1008, TO_DATE('2024-08-20', 'YYYY-MM-DD'), TO_DATE('2024-09-19', 'YYYY-MM-DD'))
 SELECT 1 FROM dual;
 
 -- ==============================================

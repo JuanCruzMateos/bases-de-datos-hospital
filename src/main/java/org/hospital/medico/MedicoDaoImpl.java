@@ -22,10 +22,10 @@ public class MedicoDaoImpl implements MedicoDao {
     private static final String INSERT_PERSONA_SQL =
             "INSERT INTO PERSONA (tipo_documento, nro_documento, nombre, apellido, tipo) VALUES (?, ?, ?, ?, ?)";
     private static final String INSERT_MEDICO_SQL =
-            "INSERT INTO MEDICO (matricula, cuil_cuit, fecha_ingreso, foto, max_cant_guardia, periodo_vacaciones, tipo_documento, nro_documento) "
-                    + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            "INSERT INTO MEDICO (matricula, cuil_cuit, fecha_ingreso, foto, max_cant_guardia, tipo_documento, nro_documento) "
+                    + "VALUES (?, ?, ?, ?, ?, ?, ?)";
     private static final String BASE_SELECT =
-            "SELECT m.matricula, m.cuil_cuit, m.fecha_ingreso, m.foto, m.max_cant_guardia, m.periodo_vacaciones, "
+            "SELECT m.matricula, m.cuil_cuit, m.fecha_ingreso, m.foto, m.max_cant_guardia, "
                     + "m.tipo_documento, m.nro_documento, "
                     + "p.nombre, p.apellido, p.tipo "
                     + "FROM MEDICO m "
@@ -35,7 +35,7 @@ public class MedicoDaoImpl implements MedicoDao {
     private static final String UPDATE_PERSONA_SQL =
             "UPDATE PERSONA SET nombre = ?, apellido = ?, tipo = ? WHERE tipo_documento = ? AND nro_documento = ?";
     private static final String UPDATE_MEDICO_SQL =
-            "UPDATE MEDICO SET cuil_cuit = ?, fecha_ingreso = ?, foto = ?, max_cant_guardia = ?, periodo_vacaciones = ? WHERE matricula = ?";
+            "UPDATE MEDICO SET cuil_cuit = ?, fecha_ingreso = ?, foto = ?, max_cant_guardia = ? WHERE matricula = ?";
     private static final String DELETE_MEDICO_SQL = "DELETE FROM MEDICO WHERE matricula = ?";
     private static final String DELETE_PERSONA_SQL = "DELETE FROM PERSONA WHERE tipo_documento = ? AND nro_documento = ?";
     private static final String INSERT_ESPECIALIDAD_SQL =
@@ -123,9 +123,8 @@ public class MedicoDaoImpl implements MedicoDao {
                     medicoStmt.setNull(4, java.sql.Types.BLOB);
                 }
                 medicoStmt.setInt(5, medico.getMaxCantGuardia());
-                medicoStmt.setString(6, medico.getPeriodoVacaciones());
-                medicoStmt.setString(7, medico.getTipoDocumento());
-                medicoStmt.setString(8, medico.getNroDocumento());
+                medicoStmt.setString(6, medico.getTipoDocumento());
+                medicoStmt.setString(7, medico.getNroDocumento());
                 medicoStmt.executeUpdate();
             }
 
@@ -254,8 +253,7 @@ public class MedicoDaoImpl implements MedicoDao {
                     medicoStmt.setNull(3, Types.BLOB);
                 }
                 medicoStmt.setInt(4, medico.getMaxCantGuardia());
-                medicoStmt.setString(5, medico.getPeriodoVacaciones());
-                medicoStmt.setLong(6, medico.getMatricula());
+                medicoStmt.setLong(5, medico.getMatricula());
                 medicoStmt.executeUpdate();
             }
 
@@ -488,21 +486,6 @@ public class MedicoDaoImpl implements MedicoDao {
         }
     }
 
-    private void bindMedico(PreparedStatement statement, Medico medico) throws SQLException {
-        statement.setLong(1, medico.getMatricula());
-        statement.setString(2, medico.getCuilCuit());
-        statement.setDate(3, toSqlDate(medico.getFechaIngreso()));
-        if (medico.getFoto() != null) {
-            statement.setBytes(4, medico.getFoto());
-        } else {
-            statement.setNull(4, Types.BLOB);
-        }
-        statement.setInt(5, medico.getMaxCantGuardia());
-        statement.setString(6, medico.getPeriodoVacaciones());
-        statement.setString(7, medico.getTipoDocumento());
-        statement.setString(8, medico.getNroDocumento());
-    }
-
     private LocalDate toLocalDate(Date date) {
         return date == null ? null : date.toLocalDate();
     }
@@ -527,7 +510,6 @@ public class MedicoDaoImpl implements MedicoDao {
                 toLocalDate(resultSet.getDate("fecha_ingreso")),
                 resultSet.getBytes("foto"),
                 resultSet.getInt("max_cant_guardia"),
-                resultSet.getString("periodo_vacaciones"),
                 especialidades
         );
     }

@@ -28,7 +28,6 @@ public class MedicoPanel extends JPanel {
     private JTextField txtCuilCuit;
     private JTextField txtFechaIngreso;
     private JTextField txtMaxCantGuardia;
-    private JTextField txtPeriodoVacaciones;
     private JLabel lblFoto;
     private JButton btnLoadFoto;
     private JButton btnClearFoto;
@@ -147,16 +146,6 @@ public class MedicoPanel extends JPanel {
         
         row++;
         
-        // Periodo Vacaciones
-        gbc.gridx = 0; gbc.gridy = row;
-        panel.add(new JLabel("Periodo Vacaciones:"), gbc);
-        gbc.gridx = 1; gbc.gridwidth = 3;
-        txtPeriodoVacaciones = new JTextField(30);
-        panel.add(txtPeriodoVacaciones, gbc);
-        
-        row++;
-        gbc.gridwidth = 1;
-        
         // Buttons
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         btnCreate = new JButton("Create");
@@ -240,7 +229,6 @@ public class MedicoPanel extends JPanel {
     public String getCuilCuit() { return txtCuilCuit.getText().trim(); }
     public String getFechaIngreso() { return txtFechaIngreso.getText().trim(); }
     public String getMaxCantGuardia() { return txtMaxCantGuardia.getText().trim(); }
-    public String getPeriodoVacaciones() { return txtPeriodoVacaciones.getText().trim(); }
     public byte[] getFotoBytes() { return fotoBytes; }
     
     // Setters for form fields
@@ -252,7 +240,6 @@ public class MedicoPanel extends JPanel {
     public void setCuilCuit(String value) { txtCuilCuit.setText(value); }
     public void setFechaIngreso(String value) { txtFechaIngreso.setText(value); }
     public void setMaxCantGuardia(String value) { txtMaxCantGuardia.setText(value); }
-    public void setPeriodoVacaciones(String value) { txtPeriodoVacaciones.setText(value); }
     public void setFotoBytes(byte[] bytes) { 
         this.fotoBytes = bytes; 
         updateFotoPreview(); 
@@ -267,7 +254,6 @@ public class MedicoPanel extends JPanel {
         txtCuilCuit.setText("");
         txtFechaIngreso.setText("");
         txtMaxCantGuardia.setText("");
-        txtPeriodoVacaciones.setText("");
         especialidadesModel.clear();
         currentEspecialidades.clear();
         setFotoBytes(null);

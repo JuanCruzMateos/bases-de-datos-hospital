@@ -19,6 +19,9 @@ public class HospitalUI extends JFrame {
     private HabitacionPanel habitacionPanel;
     private InternacionPanel internacionPanel;
     private GuardiaPanel guardiaPanel;
+    private CamaDisponiblePanel camaDisponiblePanel;
+    private VisitasMedicasPanel visitasMedicasPanel;
+    private AuditoriaGuardiasPanel auditoriaGuardiasPanel;
     
     // Controllers - stored as fields to prevent garbage collection
     // Controllers manage listeners and must remain in scope
@@ -35,6 +38,12 @@ public class HospitalUI extends JFrame {
     private InternacionController internacionController;
     @SuppressWarnings("unused")
     private GuardiaController guardiaController;
+    @SuppressWarnings("unused")
+    private CamaDisponibleController camaDisponibleController;
+    @SuppressWarnings("unused")
+    private VisitasMedicasController visitasMedicasController;
+    @SuppressWarnings("unused")
+    private AuditoriaGuardiasController auditoriaGuardiasController;
     
     public HospitalUI() {
         initializeUI();
@@ -71,14 +80,20 @@ public class HospitalUI extends JFrame {
         habitacionPanel = new HabitacionPanel();
         internacionPanel = new InternacionPanel();
         guardiaPanel = new GuardiaPanel();
+        camaDisponiblePanel = new CamaDisponiblePanel();
+        visitasMedicasPanel = new VisitasMedicasPanel();
+        auditoriaGuardiasPanel = new AuditoriaGuardiasPanel();
         
         // Add tabs
+        tabbedPane.addTab("Camas Disponibles", new ImageIcon(), camaDisponiblePanel, "View Available Beds Reports");
+        tabbedPane.addTab("Visitas Médicas", new ImageIcon(), visitasMedicasPanel, "View Patient Internations & Visit Comments");
+        tabbedPane.addTab("Auditoría Guardias", new ImageIcon(), auditoriaGuardiasPanel, "View Guard Assignment Audit Trail");
+        tabbedPane.addTab("Guardias", new ImageIcon(), guardiaPanel, "Manage Guard Shifts");
         tabbedPane.addTab("Pacientes", new ImageIcon(), pacientePanel, "Manage Patients");
         tabbedPane.addTab("Medicos", new ImageIcon(), medicoPanel, "Manage Doctors & Specialties");
         tabbedPane.addTab("Sectores", new ImageIcon(), sectorPanel, "Manage Sectors");
         tabbedPane.addTab("Habitaciones", new ImageIcon(), habitacionPanel, "Manage Rooms");
         tabbedPane.addTab("Internaciones", new ImageIcon(), internacionPanel, "Manage Hospitalizations");
-        tabbedPane.addTab("Guardias", new ImageIcon(), guardiaPanel, "Manage Guard Shifts");
         
         mainPanel.add(tabbedPane, BorderLayout.CENTER);
         
@@ -98,7 +113,7 @@ public class HospitalUI extends JFrame {
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
         titleLabel.setForeground(Color.WHITE);
         
-        JLabel subtitleLabel = new JLabel("CRUD Operations - MVC Pattern");
+        JLabel subtitleLabel = new JLabel("Bases de Datos | FI UNMdP - Grupo 4");
         subtitleLabel.setFont(new Font("Arial", Font.PLAIN, 14));
         subtitleLabel.setForeground(new Color(236, 240, 241));
         
@@ -134,6 +149,9 @@ public class HospitalUI extends JFrame {
         habitacionController = new HabitacionController(habitacionPanel);
         internacionController = new InternacionController(internacionPanel);
         guardiaController = new GuardiaController(guardiaPanel);
+        camaDisponibleController = new CamaDisponibleController(camaDisponiblePanel);
+        visitasMedicasController = new VisitasMedicasController(visitasMedicasPanel);
+        auditoriaGuardiasController = new AuditoriaGuardiasController(auditoriaGuardiasPanel);
     }
     
     /**

@@ -13,33 +13,32 @@
 
 ## 🚀 Quick Start
 
-This project provides **two complete interfaces** for managing hospital data:
+Launch the Hospital Management System UI:
 
-### 1. Graphical UI (Swing) - ⭐ **Recommended**
 ```bash
 ./launch-ui.sh
 ```
 
-### 2. Command Line Interface (CLI)
+Or run the JAR directly:
 ```bash
-mvn clean package
-java -jar target/hospital-1.0-SNAPSHOT.jar list-pacientes
+java -jar target/hospital-1.0-SNAPSHOT.jar
 ```
 
 ---
 
 ## ✨ Features
 
-- ✅ **Full CRUD Operations** - Create, Read, Update, Delete
-- ✅ **Two Interfaces** - Graphical UI (Swing) + Command Line (CLI)
+- ✅ **Full CRUD Operations** - Create, Read, Update, Delete via graphical interface
+- ✅ **Swing UI** - Professional graphical interface with MVC pattern
 - ✅ **MVC Pattern** - Clean separation of concerns in UI
 - ✅ **DAO Pattern** - Database abstraction layer
 - ✅ **6 Entities** - Paciente, Medico, Sector, Habitacion, Internacion, Guardia
-- ✅ **31 CLI Commands** - Comprehensive command-line interface
-- ✅ **4 UI Panels** - User-friendly graphical interface
+- ✅ **8 UI Tabs** - 6 CRUD tabs + 2 Report tabs
+- ✅ **Stored Procedures** - 4 stored procedures integrated with UI ⭐
+- ✅ **Report Tabs** - Camas Disponibles & Visitas Médicas ⭐
 - ✅ **Transaction Management** - ACID compliance
 - ✅ **Error Handling** - Robust and user-friendly
-- ✅ **Complete Documentation** - 9 documentation files
+- ✅ **Complete Documentation** - 10 documentation files
 
 ---
 
@@ -47,12 +46,12 @@ java -jar target/hospital-1.0-SNAPSHOT.jar list-pacientes
 
 ### For Users
 - **[SWING_UI_QUICK_START.md](SWING_UI_QUICK_START.md)** - Get started with the UI in 2 minutes ⚡
-- **[QUICK_START.md](QUICK_START.md)** - CLI quick reference guide
 - **[PROJECT_COMPLETE.md](PROJECT_COMPLETE.md)** - Full project overview
 
 ### For Developers
 - **[UI_DOCUMENTATION.md](UI_DOCUMENTATION.md)** - Complete Swing UI guide (MVC pattern)
-- **[CRUD_DOCUMENTATION.md](CRUD_DOCUMENTATION.md)** - Complete API and CLI documentation
+- **[STORED_PROCEDURES_IMPLEMENTATION.md](STORED_PROCEDURES_IMPLEMENTATION.md)** - Stored procedures integration guide ⭐
+- **[CRUD_DOCUMENTATION.md](CRUD_DOCUMENTATION.md)** - Complete DAO and data access documentation
 - **[modelo-relacional.md](modelo-relacional.md)** - Database schema and relational model
 - **[SWING_UI_SUMMARY.md](SWING_UI_SUMMARY.md)** - UI implementation summary
 - **[CRUD_SUMMARY.md](CRUD_SUMMARY.md)** - DAO implementation summary
@@ -64,28 +63,35 @@ java -jar target/hospital-1.0-SNAPSHOT.jar list-pacientes
 ```
 hospital/
 ├── src/main/java/org/hospital/
-│   ├── ui/                      # Swing UI (MVC Pattern) ✨ NEW!
+│   ├── ui/                      # Swing UI (MVC Pattern)
 │   │   ├── controller/          # Controllers (Business logic)
 │   │   │   ├── BaseController.java
 │   │   │   ├── PacienteController.java
 │   │   │   ├── SectorController.java
 │   │   │   ├── HabitacionController.java
-│   │   │   └── InternacionController.java
+│   │   │   ├── InternacionController.java
+│   │   │   ├── GuardiaController.java
+│   │   │   ├── CamaDisponibleController.java   # ⭐ NEW!
+│   │   │   └── VisitasMedicasController.java   # ⭐ NEW!
 │   │   ├── view/                # Views (UI components)
 │   │   │   ├── PacientePanel.java
+│   │   │   ├── MedicoPanel.java
 │   │   │   ├── SectorPanel.java
 │   │   │   ├── HabitacionPanel.java
-│   │   │   └── InternacionPanel.java
+│   │   │   ├── InternacionPanel.java
+│   │   │   ├── GuardiaPanel.java
+│   │   │   ├── CamaDisponiblePanel.java        # ⭐ NEW!
+│   │   │   └── VisitasMedicasPanel.java        # ⭐ NEW!
 │   │   └── HospitalUI.java      # Main UI window
 │   ├── paciente/                # Patient entity
 │   ├── medico/                  # Doctor entity
 │   ├── internacion/             # Hospitalization entities
+│   │                            # + Stored procedures DTOs ⭐ NEW!
 │   ├── guardia/                 # Duty entities
 │   ├── persona/                 # Person base entity
 │   ├── config/                  # Configuration
 │   ├── exception/               # Custom exceptions
-│   ├── App.java                 # CLI application
-│   └── AppUI.java               # UI launcher ✨ NEW!
+│   └── AppUI.java               # Application launcher
 ├── db_scripts/
 │   ├── init/                    # Database initialization scripts
 │   └── procedures/              # Stored procedures
@@ -97,13 +103,13 @@ hospital/
 
 ## 📊 Statistics
 
-- **38 Java classes** compiled successfully
-- **10 UI classes** implementing MVC pattern
+- **72 Java classes** compiled successfully
+- **16 UI classes** implementing MVC pattern
 - **6 entities** with full CRUD operations
-- **31 CLI commands** available
-- **4 UI panels** (Swing graphical interface)
-- **9 documentation files**
-- **~2,050 lines** of UI code
+- **8 UI tabs** (6 CRUD + 2 Reports)
+- **4 stored procedures** integrated with UI ⭐
+- **10 documentation files**
+- **~3,500 lines** of UI code
 - **100% compilation success** ✅
 
 ---
@@ -159,49 +165,41 @@ db.password=hospital123
 
 ---
 
-## 🎯 Usage Examples
+## 🎯 Usage Guide
 
-### Swing UI
+### Launching the Application
 
-**Launch:**
+**Using the launch script:**
 ```bash
 ./launch-ui.sh
 ```
 
-**Features:**
-- Click tabs to switch entities (Pacientes, Sectores, Habitaciones, Internaciones)
-- Fill form and click "Create" to add records
-- Click table row to load into form
-- Click "Update" to modify selected record
-- Click "Delete" to remove selected record
-- Click "Refresh" to reload data
-
-### CLI
-
-**List all patients:**
-```bash
-java -jar target/hospital-1.0-SNAPSHOT.jar list-pacientes
-```
-
-**Create a patient:**
-```bash
-java -jar target/hospital-1.0-SNAPSHOT.jar create-paciente DNI 12345678 Juan Perez PACIENTE 1990-01-15 M
-```
-
-**Get specific patient:**
-```bash
-java -jar target/hospital-1.0-SNAPSHOT.jar get-paciente DNI 12345678
-```
-
-**List active hospitalizations:**
-```bash
-java -jar target/hospital-1.0-SNAPSHOT.jar list-internaciones-activas
-```
-
-**Show all commands:**
+**Or run the JAR directly:**
 ```bash
 java -jar target/hospital-1.0-SNAPSHOT.jar
 ```
+
+### Using the Interface
+
+**Navigation:**
+- Click tabs to switch between different sections:
+  - **CRUD Tabs**: Pacientes, Medicos, Sectores, Habitaciones, Internaciones, Guardias
+  - **Report Tabs**: Camas Disponibles, Visitas Médicas ⭐
+
+**CRUD Operations:**
+- **Create**: Fill the form and click "Create" to add new records
+- **Read**: Browse data in the table, click "Refresh" to reload
+- **Update**: Click a table row to load it into the form, modify, and click "Update"
+- **Delete**: Select a row and click "Delete" to remove the record
+- **Clear**: Click "Clear" to reset the form
+
+**Report Features:**
+- **Camas Disponibles**: 
+  - View summary of available beds by sector
+  - Click on a sector to see detailed room and bed information
+- **Visitas Médicas**: 
+  - Search patient internations by document type and number
+  - Click on an internation to view medical visit comments
 
 ---
 
@@ -238,16 +236,16 @@ The UI provides a professional, user-friendly interface with:
 
 ## 🧪 Testing
 
-### Manual Testing
+### Building and Running
 ```bash
-# Build
+# Build the project
 mvn clean package
 
-# Test UI
+# Launch the UI
 ./launch-ui.sh
 
-# Test CLI
-./examples.sh
+# Or run directly
+java -jar target/hospital-1.0-SNAPSHOT.jar
 ```
 
 ---
@@ -292,14 +290,15 @@ Universidad Nacional de Mar del Plata - Facultad de Ingeniería
 **COMPLETE** ✅
 
 - ✅ Database schema design and implementation
-- ✅ Full CRUD operations for 6 entities
-- ✅ CLI interface with 31 commands
-- ✅ Swing UI with MVC pattern (4 panels)
+- ✅ Full CRUD operations for 6 entities via UI
+- ✅ Swing UI with MVC pattern (8 tabs)
 - ✅ DAO pattern implementation
+- ✅ Stored procedures integration (4 procedures) ⭐
+- ✅ Report tabs (Camas Disponibles & Visitas Médicas) ⭐
 - ✅ Transaction management
-- ✅ Error handling
+- ✅ Error handling and validation
 - ✅ Complete documentation
 - ✅ Launch scripts
-- ✅ Example data and scripts
+- ✅ Example database data
 
 **Ready for use!** 🚀

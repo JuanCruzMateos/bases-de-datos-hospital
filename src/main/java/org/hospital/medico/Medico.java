@@ -13,7 +13,6 @@ public class Medico extends Persona {
     private LocalDate fechaIngreso;
     private byte[] foto;
     private int maxCantGuardia;
-    private String periodoVacaciones;
     private Set<Especialidad> especialidades;
 
     public Medico() {
@@ -22,14 +21,13 @@ public class Medico extends Persona {
 
     public Medico(String tipoDocumento, String nroDocumento, String nombre, String apellido, String tipo,
             long matricula, String cuilCuit, LocalDate fechaIngreso, byte[] foto,
-            int maxCantGuardia, String periodoVacaciones, Set<Especialidad> especialidades) {
+            int maxCantGuardia, Set<Especialidad> especialidades) {
         super(tipoDocumento, nroDocumento, nombre, apellido, tipo);
         this.matricula = matricula;
         this.cuilCuit = cuilCuit;
         this.fechaIngreso = fechaIngreso;
         this.foto = foto;
         this.maxCantGuardia = maxCantGuardia;
-        this.periodoVacaciones = periodoVacaciones;
         this.especialidades = especialidades;
     }
 
@@ -73,14 +71,6 @@ public class Medico extends Persona {
         this.maxCantGuardia = maxCantGuardia;
     }
 
-    public String getPeriodoVacaciones() {
-        return periodoVacaciones;
-    }
-
-    public void setPeriodoVacaciones(String periodoVacaciones) {
-        this.periodoVacaciones = periodoVacaciones;
-    }
-
     public Set<Especialidad> getEspecialidades() {
         return especialidades;
     }
@@ -103,14 +93,13 @@ public class Medico extends Persona {
                 Objects.equals(cuilCuit, medico.cuilCuit) &&
                 Objects.equals(fechaIngreso, medico.fechaIngreso) &&
                 Arrays.equals(foto, medico.foto) &&
-                Objects.equals(periodoVacaciones, medico.periodoVacaciones) &&
                 Objects.equals(especialidades, medico.especialidades);
     }
 
     @Override
     public int hashCode() {
         int result = Objects.hash(super.hashCode(), matricula, cuilCuit, fechaIngreso, maxCantGuardia,
-                periodoVacaciones, especialidades);
+                especialidades);
         result = 31 * result + Arrays.hashCode(foto);
         return result;
     }
@@ -124,7 +113,6 @@ public class Medico extends Persona {
                 ", apellido='" + getApellido() + '\'' +
                 ", fechaIngreso=" + fechaIngreso +
                 ", maxCantGuardia=" + maxCantGuardia +
-                ", periodoVacaciones='" + periodoVacaciones + '\'' +
                 ", especialidades=" + especialidades +
                 ", foto=" + (foto != null ? "[" + foto.length + " bytes]" : "null") + '}';
     }
