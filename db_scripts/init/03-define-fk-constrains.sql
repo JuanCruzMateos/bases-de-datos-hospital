@@ -12,6 +12,8 @@ ALTER TABLE PACIENTE ADD (
         ON DELETE CASCADE,
     CONSTRAINT chk_paciente_sexo
         CHECK (sexo IN ('M', 'F', 'X'))
+    CONSTRAINT chk_paciente_fecha_nacimiento_futura
+        CHECK (fecha_nacimiento <= SYSDATE)
 );
 
 ALTER TABLE MEDICO ADD (
@@ -146,5 +148,7 @@ ALTER TABLE VACACIONES ADD (
     CONSTRAINT fk_vacaciones_medico
         FOREIGN KEY (matricula)
         REFERENCES MEDICO (matricula)
-        ON DELETE CASCADE
+        ON DELETE CASCADE.
+    CONSTRAINT chk_vacaciones_fecha_inicio_antes_fecha_fin
+        CHECK (fecha_inicio <= fecha_fin)
 );

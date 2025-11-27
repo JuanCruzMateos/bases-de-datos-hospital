@@ -5,7 +5,7 @@ ALTER SESSION SET CURRENT_SCHEMA = hospital;
 
 --  Un índice B-tree es la estructura de índice “normal” de casi todos los motores relacionales (incluido Oracle):
 --      Guarda los valores ordenados.
---      Internamente es un árbol balanceado (B-tree):
+--      Internamente es un árbol balanceado (B-tree*):
 --      La búsqueda, inserción, etc. son O(log n).
 
 -- Sobre las tablas involucradas en las transacciones de guardias y 

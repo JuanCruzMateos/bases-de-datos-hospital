@@ -68,7 +68,7 @@ Persona.(tipoDocumento, nrodocumento) puede no estar en Paciente.(tipoDocumento,
 
 ---
 
-### Medico(matricula, cuilcuit, fechaIngreso, foto, maxCantGuardia, periodoVacaciones, *tipoDocumento, nroDocumento)*  
+### Medico(matricula, cuilcuit, fechaIngreso, foto, maxCantGuardia, *tipoDocumento, nroDocumento)*  
 CK \= { (tipoDocumento, nroDocumento), matricula, {cuilCuit} }  
 PK \= {matricula}  
 FK \= {(tipoDocumento, nroDocumento)}
@@ -164,7 +164,9 @@ Recorrido.matricula debe estar en Medico.matricula
 Ronda.idRonda puede no estar en Recorrido.idRonda  
 Medico.matriculal puede no estar en Recorrido.matricula
 
-Comenta\_Sobre(*idRecorrido, nroInternacion*, comentario)  
+---
+
+## Comenta\_Sobre(*idRecorrido, nroInternacion*, comentario)  
 CK \= PK \= {(idRecorrido, nroInternacion)}  
 FK \= {idRecorrido, nroInternacion}
 
@@ -247,17 +249,17 @@ Verificó FN:
 * FNBC: Todo determinante X es superclave: Cumple  
   * { (tipoDocumento, nroDocumento) } es superclave
 
-Medico( matricula, cuilcuit, fechaIngreso, foto, maxCantGuardia, periodoVacaciones, *tipoDocumento, nroDocumento )*  
+Medico( matricula, cuilcuit, fechaIngreso, foto, maxCantGuardia, *tipoDocumento, nroDocumento )*  
 CK \= { {matricula}, {cuilCuit}, (tipoDocumento, nroDocumento) }  
 PK \= { matricula }  
 FK \= { (tipoDocumento, nroDocumento) }
 
-F \= {matricula → cuilcuit, matricula → fechaIngreso, matricula → foto, matricula → maxCantGuardia, matricula → periodoVacaciones, matricula → (tipoDocumento, nroDocumento), (tipoDocumento, nroDocumento) → matricula, cuilcuit → matricula}
+F \= {matricula → cuilcuit, matricula → fechaIngreso, matricula → foto, matricula → maxCantGuardia, matricula → (tipoDocumento, nroDocumento), (tipoDocumento, nroDocumento) → matricula, cuilcuit → matricula}
 
 Verificó Fmin:
 
 * **Descomponer** las dependencias para que cada una tenga **un solo atributo** en el lado derecho: Cumple  
-  * F’ \= {matricula → cuilcuit, matricula → fechaIngreso, matricula → foto, matricula → maxCantGuardia, matricula → periodoVacaciones, matricula → *tipoDocumento,* matricula → *nroDocumento*, (*tipoDocumento, nroDocumento*) → matricula, cuilcuit → matricula}  
+  * F’ \= {matricula → cuilcuit, matricula → fechaIngreso, matricula → foto, matricula → maxCantGuardia, , matricula → *tipoDocumento,* matricula → *nroDocumento*, (*tipoDocumento, nroDocumento*) → matricula, cuilcuit → matricula}  
 * **Eliminar atributos redundantes del lado izquierdo** (probar si alguno puede quitarse sin alterar la equivalencia): Cumple  
 * **Eliminar dependencias redundantes** (probar si alguna DF puede eliminarse sin cambiar la clausura total): Cumple
 
@@ -268,7 +270,7 @@ Verificó FN:
 * 1FN: Todos los atributos son atómicos: Cumple  
 * 2FN: Cada atributo NO primo NO es parcialmente dependiente de alguna clave de R (dependencia total): Cumple  
   * Atributos primos: { matricula, cuilCuit, tipoDocumento, nroDocumento }  
-  * Atributos no primos: { fechaIngreso, foto, maxCantGuardia, periodoVacaciones }  
+  * Atributos no primos: { fechaIngreso, foto, maxCantGuardia}  
 * 3FN: Si para cada DF X → A se cumple: a) X es superclave de R, o b) A es atributo primo de R : Cumple  
   * matricula → cuilcuit: X es superclave y  A es atributo primo de R  
   * matricula → fechaIngreso: X es superclave  

@@ -233,3 +233,236 @@ EXCEPTION
 END;
 /
 
+
+-- ========================================================================
+-- 8. Chequeo: si el tipo_doc es DNI, el varchar2 del cuil contiene el numero del dni
+-- ========================================================================
+
+CREATE OR REPLACE TRIGGER tr_medico_cuil_dni
+BEFORE INSERT OR UPDATE OF tipo_documento, cuil_cuit ON MEDICO
+FOR EACH ROW
+DECLARE
+BEGIN
+    IF :NEW.tipo_documento = 'DNI' AND :NEW.cuil_cuit NOT LIKE '%' || :NEW.nro_documento || '%' THEN
+        RAISE_APPLICATION_ERROR(-20001, 'El cuil/cuit debe contener el numero de dni.');  -- 20001 es el codigo de error por defecto de Oracle.
+    END IF;
+END;
+/
+
+-- ========================================================================
+-- 9. Chequeo: un paciente no puede tener dos internaciones activas simultáneamente
+-- ========================================================================
+
+CREATE OR REPLACE TRIGGER tr_internacion_unica_activa
+BEFORE INSERT OR UPDATE OF fecha_fin ON INTERNACION
+FOR EACH ROW
+DECLARE
+    v_internaciones_activas NUMBER;
+BEGIN
+    -- Solo verificar si la internación nueva/actualizada está activa (fecha_fin IS NULL)
+    IF :NEW.fecha_fin IS NULL THEN
+        -- Contar internaciones activas del mismo paciente (excluyendo la actual)
+        SELECT COUNT(*)
+        INTO v_internaciones_activas
+        FROM INTERNACION
+        WHERE tipo_documento = :NEW.tipo_documento
+            AND nro_documento = :NEW.nro_documento
+            AND fecha_fin IS NULL
+            AND nro_internacion != :NEW.nro_internacion; -- Excluir la internación actual en caso de UPDATE
+        
+        IF v_internaciones_activas > 0 THEN
+            RAISE_APPLICATION_ERROR(
+                -20050,
+                'El paciente con ' || :NEW.tipo_documento || ' ' || :NEW.nro_documento ||
+                ' ya tiene una internacion activa. No puede tener dos internaciones simultaneas.'
+            );
+        END IF;
+    END IF;
+END;
+/
+
+-- ========================================================================
+-- 10. Chequeo: el médico principal debe tener al menos una especialidad 
+--     asociada con el sector de la habitación
+-- ========================================================================
+
+CREATE OR REPLACE TRIGGER tr_medico_especialidad_sector_ubica
+BEFORE INSERT ON SE_UBICA
+FOR EACH ROW
+DECLARE
+    v_matricula_medico  INTERNACION.matricula%TYPE;
+    v_id_sector         HABITACION.id_sector%TYPE;
+    v_especialidades    NUMBER;
+BEGIN
+    -- 1) Obtener el médico principal de la internación
+    SELECT matricula
+    INTO v_matricula_medico
+    FROM INTERNACION
+    WHERE nro_internacion = :NEW.nro_internacion;
+    
+    -- 2) Obtener el sector de la habitación donde se ubica
+    SELECT id_sector
+    INTO v_id_sector
+    FROM HABITACION
+    WHERE nro_habitacion = :NEW.nro_habitacion;
+    
+    -- 3) Verificar que el médico tenga al menos una especialidad en ese sector
+    SELECT COUNT(*)
+    INTO v_especialidades
+    FROM SE_ESPECIALIZA_EN see
+    JOIN ESPECIALIDAD e ON see.cod_especialidad = e.cod_especialidad
+    WHERE see.matricula = v_matricula_medico
+        AND e.id_sector = v_id_sector;
+    
+    IF v_especialidades = 0 THEN
+        RAISE_APPLICATION_ERROR(
+            -20051,
+            'El medico principal (matricula ' || v_matricula_medico ||
+            ') no tiene ninguna especialidad asociada al sector ' || v_id_sector ||
+            ' de la habitacion ' || :NEW.nro_habitacion || '.'
+        );
+    END IF;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        RAISE_APPLICATION_ERROR(
+            -20052,
+            'Error al validar medico/sector: datos no encontrados.'
+        );
+END;
+/
+
+-- Trigger complementario
+-- considera que primero se crea la internacion y luego se asigna el médico
+CREATE OR REPLACE TRIGGER tr_medico_especialidad_sector_int
+BEFORE INSERT OR UPDATE OF matricula ON INTERNACION
+FOR EACH ROW
+DECLARE
+    v_id_sector         HABITACION.id_sector%TYPE;
+    v_especialidades    NUMBER;
+    v_tiene_ubicacion   NUMBER;
+BEGIN
+    -- Verificar si la internación ya tiene una ubicación asignada (SE_UBICA)
+    SELECT COUNT(*)
+    INTO v_tiene_ubicacion
+    FROM SE_UBICA
+    WHERE nro_internacion = :NEW.nro_internacion;
+    
+    -- Solo validar si ya existe una ubicación
+    IF v_tiene_ubicacion > 0 THEN
+        -- Obtener el sector de la habitación actual (la más reciente)
+        SELECT h.id_sector
+        INTO v_id_sector
+        FROM SE_UBICA su
+        JOIN HABITACION h ON su.nro_habitacion = h.nro_habitacion
+        WHERE su.nro_internacion = :NEW.nro_internacion
+        ORDER BY su.fecha_hora_ingreso DESC
+        FETCH FIRST 1 ROW ONLY;
+        
+        -- Verificar que el médico tenga al menos una especialidad en ese sector
+        SELECT COUNT(*)
+        INTO v_especialidades
+        FROM SE_ESPECIALIZA_EN see
+        JOIN ESPECIALIDAD e ON see.cod_especialidad = e.cod_especialidad
+        WHERE see.matricula = :NEW.matricula
+            AND e.id_sector = v_id_sector;
+        
+        IF v_especialidades = 0 THEN
+            RAISE_APPLICATION_ERROR(
+                -20053,
+                'El medico (matricula ' || :NEW.matricula ||
+                ') no tiene ninguna especialidad asociada al sector ' || v_id_sector ||
+                ' donde esta ubicado el paciente.'
+            );
+        END IF;
+    END IF;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        RAISE_APPLICATION_ERROR(
+            -20054,
+            'Error al validar medico/sector en internacion: datos no encontrados.'
+        );
+END;
+/
+
+-- ========================================================================
+-- 11. Chequeo: un médico no puede estar de guardia si está de vacaciones
+-- ========================================================================
+
+CREATE OR REPLACE TRIGGER tr_guardia_no_vacaciones
+BEFORE INSERT OR UPDATE OF matricula, fecha_hora ON GUARDIA
+FOR EACH ROW
+DECLARE
+    v_en_vacaciones NUMBER;
+BEGIN
+    -- Verificar si el médico está de vacaciones en la fecha de la guardia
+    SELECT COUNT(*)
+    INTO v_en_vacaciones
+    FROM VACACIONES
+    WHERE matricula = :NEW.matricula
+        AND TRUNC(:NEW.fecha_hora) BETWEEN fecha_inicio AND fecha_fin;
+    
+    IF v_en_vacaciones > 0 THEN
+        RAISE_APPLICATION_ERROR(
+            -20110,
+            'Error: El medico con matricula ' || :NEW.matricula || 
+            ' esta de vacaciones el dia ' || TO_CHAR(:NEW.fecha_hora, 'YYYY-MM-DD') ||
+            '. No se puede asignar una guardia.'
+        );
+    END IF;
+END;
+/
+
+-- -- Trigger complementario: no permitir agregar vacaciones si hay guardias
+-- CREATE OR REPLACE TRIGGER tr_vacaciones_no_guardias
+-- BEFORE INSERT OR UPDATE ON VACACIONES
+-- FOR EACH ROW
+-- DECLARE
+--     v_guardias_conflicto NUMBER;
+-- BEGIN
+--     -- Verificar que fecha_inicio < fecha_fin
+--     IF :NEW.fecha_inicio >= :NEW.fecha_fin THEN
+--         RAISE_APPLICATION_ERROR(
+--             -20111,
+--             'Error: La fecha de inicio debe ser anterior a la fecha de fin.'
+--         );
+--     END IF;
+    
+--     -- Verificar si el médico tiene guardias durante el periodo de vacaciones
+--     SELECT COUNT(*)
+--     INTO v_guardias_conflicto
+--     FROM GUARDIA
+--     WHERE matricula = :NEW.matricula
+--         AND TRUNC(fecha_hora) BETWEEN :NEW.fecha_inicio AND :NEW.fecha_fin;
+    
+--     IF v_guardias_conflicto > 0 THEN
+--         RAISE_APPLICATION_ERROR(
+--             -20112,
+--             'Error: El medico tiene ' || v_guardias_conflicto || 
+--             ' guardia(s) programada(s) durante el periodo de vacaciones ' ||
+--             '(' || TO_CHAR(:NEW.fecha_inicio, 'YYYY-MM-DD') || ' - ' || 
+--             TO_CHAR(:NEW.fecha_fin, 'YYYY-MM-DD') || '). ' ||
+--             'Debe reasignar o cancelar las guardias primero.'
+--         );
+--     END IF;
+    
+--     -- Verificar que no haya solapamiento de vacaciones
+--     DECLARE
+--         v_vacaciones_solapadas NUMBER;
+--     BEGIN
+--         SELECT COUNT(*)
+--         INTO v_vacaciones_solapadas
+--         FROM VACACIONES
+--         WHERE matricula = :NEW.matricula
+--             AND fecha_inicio < :NEW.fecha_fin
+--             AND fecha_fin > :NEW.fecha_inicio
+--             AND NOT (fecha_inicio = :NEW.fecha_inicio AND fecha_fin = :NEW.fecha_fin);
+        
+--         IF v_vacaciones_solapadas > 0 THEN
+--             RAISE_APPLICATION_ERROR(
+--                 -20113,
+--                 'Error: Ya existen vacaciones que se solapan con el periodo solicitado.'
+--             );
+--         END IF;
+--     END;
+-- END;
+-- /
