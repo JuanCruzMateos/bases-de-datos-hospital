@@ -2,101 +2,100 @@ package org.hospital.medico;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.logging.Logger;
 
 import org.hospital.exception.DataAccessException;
 
 /**
- * Service layer for Vacaciones business logic.
- * Implements transaction-based operations with proper validation.
+ * Service layer for Vacaciones (Vacations) operations.
+ * Provides business logic and coordinates with the DAO layer.
+ * Uses transaction-based operations with proper validation.
  */
 public class VacacionesService {
-    private static final Logger logger = Logger.getLogger(VacacionesService.class.getName());
-    private final VacacionesDao vacacionesDao;
-
-    public VacacionesService(VacacionesDao vacacionesDao) {
-        this.vacacionesDao = vacacionesDao;
-    }
-
+    private VacacionesDao vacacionesDao;
+    
     public VacacionesService() {
-        this(new VacacionesDaoImpl());
+        this.vacacionesDao = new VacacionesDaoImpl();
     }
-
+    
     /**
-     * Create a new vacation period with transaction logic and validation.
-     * Uses SERIALIZABLE isolation level as per SQL transaction requirements.
-     */
-    public Vacaciones createVacaciones(Vacaciones vacaciones) throws DataAccessException {
-        logger.info("Service: Creating new vacaciones for medico: " + vacaciones.getMatricula());
-        validateVacaciones(vacaciones);
-        return vacacionesDao.createWithTransaction(vacaciones);
-    }
-
-    /**
-     * Update an existing vacation period with transaction logic.
-     */
-    public Vacaciones updateVacaciones(Vacaciones oldVacaciones, Vacaciones newVacaciones) throws DataAccessException {
-        logger.info("Service: Updating vacaciones for medico: " + newVacaciones.getMatricula());
-        validateVacaciones(newVacaciones);
-        return vacacionesDao.updateWithTransaction(oldVacaciones, newVacaciones);
-    }
-
-    /**
-     * Get all vacations for a specific medico.
-     */
-    public List<Vacaciones> getVacacionesByMatricula(long matricula) throws DataAccessException {
-        logger.fine("Service: Retrieving vacaciones for medico: " + matricula);
-        return vacacionesDao.findByMatricula(matricula);
-    }
-
-    /**
-     * Get all vacations in the system.
+     * Get all vacation periods from the database.
+     * 
+     * @return List of all vacations
+     * @throws DataAccessException if there's an error accessing data
      */
     public List<Vacaciones> getAllVacaciones() throws DataAccessException {
-        logger.fine("Service: Retrieving all vacaciones");
         return vacacionesDao.findAll();
     }
-
+    
     /**
-     * Delete a specific vacation period.
+     * Get all vacation periods for a specific medico.
+     * 
+     * @param matricula The medico's matricula
+     * @return List of vacations for the medico
+     * @throws DataAccessException if there's an error accessing data
      */
-    public boolean deleteVacaciones(long matricula, LocalDate fechaInicio, LocalDate fechaFin) throws DataAccessException {
-        logger.info("Service: Deleting vacaciones for medico " + matricula + 
-                    " from " + fechaInicio + " to " + fechaFin);
-        return vacacionesDao.delete(matricula, fechaInicio, fechaFin);
+    public List<Vacaciones> getVacacionesByMatricula(long matricula) throws DataAccessException {
+        return vacacionesDao.findByMatricula(matricula);
     }
-
+    
     /**
-     * Check if a medico is on vacation on a specific date.
+     * Create a new vacation period with transaction logic.
+     * Validates all business rules including date ranges, overlaps, and conflicts.
+     * 
+     * @param vacaciones The vacation to create
+     * @throws DataAccessException if there's an error accessing data
+     * @throws IllegalArgumentException if business rules are violated
      */
-    public boolean isMedicoOnVacation(long matricula, LocalDate date) throws DataAccessException {
-        logger.fine("Service: Checking if medico " + matricula + " is on vacation on " + date);
-        return vacacionesDao.isOnVacation(matricula, date);
-    }
-
-    /**
-     * Validate business rules for vacaciones.
-     */
-    private void validateVacaciones(Vacaciones vacaciones) {
+    public void createVacaciones(Vacaciones vacaciones) throws DataAccessException {
         if (vacaciones == null) {
             throw new IllegalArgumentException("Vacaciones cannot be null");
         }
         
-        if (vacaciones.getFechaInicio() == null) {
-            throw new IllegalArgumentException("Fecha inicio must not be null");
+        // Use transaction-based create which includes all validations
+        vacacionesDao.createWithTransaction(vacaciones);
+    }
+    
+    /**
+     * Update an existing vacation period with transaction logic.
+     * Deletes the old vacation and creates a new one with validation.
+     * 
+     * @param oldVacaciones The old vacation to be replaced
+     * @param newVacaciones The new vacation data
+     * @throws DataAccessException if there's an error accessing data
+     * @throws IllegalArgumentException if business rules are violated
+     */
+    public void updateVacaciones(Vacaciones oldVacaciones, Vacaciones newVacaciones) throws DataAccessException {
+        if (oldVacaciones == null || newVacaciones == null) {
+            throw new IllegalArgumentException("Vacaciones cannot be null");
         }
         
-        if (vacaciones.getFechaFin() == null) {
-            throw new IllegalArgumentException("Fecha fin must not be null");
-        }
-        
-        if (vacaciones.getFechaInicio().isAfter(vacaciones.getFechaFin())) {
-            throw new IllegalArgumentException("Fecha inicio must be before or equal to fecha fin");
-        }
-        
-        if (vacaciones.getMatricula() <= 0) {
-            throw new IllegalArgumentException("Matricula must be positive");
-        }
+        // Use transaction-based update which handles delete + create with validation
+        vacacionesDao.updateWithTransaction(oldVacaciones, newVacaciones);
+    }
+    
+    /**
+     * Delete a specific vacation period.
+     * 
+     * @param matricula The medico's matricula
+     * @param fechaInicio The start date of the vacation period
+     * @param fechaFin The end date of the vacation period
+     * @return true if the vacation was deleted, false if not found
+     * @throws DataAccessException if there's an error accessing data
+     */
+    public boolean deleteVacaciones(long matricula, LocalDate fechaInicio, LocalDate fechaFin) throws DataAccessException {
+        return vacacionesDao.delete(matricula, fechaInicio, fechaFin);
+    }
+    
+    /**
+     * Check if a medico is on vacation on a specific date.
+     * 
+     * @param matricula The medico's matricula
+     * @param date The date to check
+     * @return true if the medico is on vacation on that date
+     * @throws DataAccessException if there's an error accessing data
+     */
+    public boolean isOnVacation(long matricula, LocalDate date) throws DataAccessException {
+        return vacacionesDao.isOnVacation(matricula, date);
     }
 }
 

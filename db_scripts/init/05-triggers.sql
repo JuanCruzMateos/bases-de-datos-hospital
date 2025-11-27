@@ -412,6 +412,7 @@ BEGIN
 END;
 /
 
+-- Solucionado en la transaction de vacaciones.sql
 -- -- Trigger complementario: no permitir agregar vacaciones si hay guardias
 -- CREATE OR REPLACE TRIGGER tr_vacaciones_no_guardias
 -- BEFORE INSERT OR UPDATE ON VACACIONES

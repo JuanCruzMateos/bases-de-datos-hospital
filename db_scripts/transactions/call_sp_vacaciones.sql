@@ -15,7 +15,6 @@
 -- - Handles ORA-08177 serialization conflicts (retry recommended)
 -- =========================================================
 
-SET SERVEROUTPUT ON;
 
 ALTER SESSION SET CONTAINER = FREEPDB1;
 ALTER SESSION SET CURRENT_SCHEMA = hospital;
