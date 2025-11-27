@@ -2,7 +2,7 @@
 -- Este es el archivo maestro que carga todos los procedimientos almacenados y scripts necesarios
 -- para reconstruir la base de datos del esquema 'hospital'.
 -- docker exec -it oracle-hospital bash 
--- sqlplus hospital/hospital123@FREEPDB1                   Alternativa --sqlplus sys/admin123 as sysdba
+-- sqlplus hospital/hospital123@FREEPDB1                  
 -- @/opt/oracle/scripts/startup/10-rebuild-hospital.sql
 
 
@@ -20,3 +20,6 @@ ALTER SESSION SET CURRENT_SCHEMA = hospital;
 @/opt/oracle/scripts/procedures/sp_camas_disponibles.sql
 @/opt/oracle/scripts/procedures/sp_comentarios_visitas.sql
 @/opt/oracle/scripts/procedures/sp_auditoria_guardias.sql
+
+
+
