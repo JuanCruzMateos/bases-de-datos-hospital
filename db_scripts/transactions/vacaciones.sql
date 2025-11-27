@@ -1,24 +1,24 @@
 
 -- =========================================================
--- Business Rules:
--- 1. A doctor cannot be on guard duty if they are on vacation that day
--- 2. Vacations should not overlap for the same doctor
--- 3. Date range must be valid (start <= end)
--- 4. All dates must be non-null
+-- Reglas de negocio:
+-- 1. Un medico no puede estar de guardia si esta de vacaciones ese dia
+-- 2. Las vacaciones no deben solaparse para el mismo medico
+-- 3. El rango de fechas debe ser valido (inicio <= fin)
+-- 4. Todas las fechas deben ser no nulas
 --
--- Error Codes:
--- -20098: Null dates provided
--- -20099: Invalid date range (start > end)
--- -20100: Doctor does not exist
--- -20101: Overlapping vacations detected
--- -20102: Guard duty conflicts during vacation period
+-- Codigos de error:
+-- -20098: Fechas nulas ingresadas
+-- -20099: Rango de fechas invalido (inicio > fin)
+-- -20100: El medico no existe
+-- -20101: Vacaciones solapadas detectadas
+-- -20102: Conflicto de guardias durante el periodo de vacaciones
 --
--- Transaction Control:
--- - Uses SERIALIZABLE isolation level to prevent race conditions
--- - Uses SAVEPOINT for rollback capability
--- - Commits only on successful completion
--- - Rolls back to savepoint on any error
--- - Handles ORA-08177 serialization conflicts (retry recommended)
+-- Control de la transaccion:
+-- - Usa nivel SERIALIZABLE para prevenir condiciones de carrera
+-- - Usa SAVEPOINT para permitir rollback
+-- - Hace commit solo si todo finaliza correctamente
+-- - Hace rollback al savepoint ante cualquier error
+-- - Maneja conflictos de serializacion ORA-08177 (se recomienda reintentar)
 -- =========================================================
 
 SET SERVEROUTPUT ON;
@@ -35,12 +35,12 @@ DECLARE
     v_vacaciones_solapadas NUMBER;
     v_medico_existe      NUMBER;
 BEGIN
-    -- Start transaction with SERIALIZABLE isolation level
-    -- This prevents race conditions between validation checks and INSERT
+    -- Inicia la transaccion con nivel SERIALIZABLE
+    -- Previene condiciones de carrera entre las validaciones y el INSERT
     SAVEPOINT inicio_transaccion;
     SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
 
-    -- 1. Validate date range
+    -- 1. Validar rango de fechas
     IF v_fecha_inicio > v_fecha_fin THEN
         RAISE_APPLICATION_ERROR(
             -20099,
@@ -56,7 +56,7 @@ BEGIN
         );
     END IF;
 
-    -- 2. Validate that the doctor exists
+    -- 2. Validar que el medico exista
     SELECT COUNT(*)
     INTO v_medico_existe
     FROM MEDICO
@@ -69,8 +69,8 @@ BEGIN
         );
     END IF;
     
-    -- 3. Check for overlapping vacations for the same doctor
-    -- Two periods overlap if: start1 < end2 AND start2 < end1
+    -- 3. Revisar vacaciones solapadas para el mismo medico
+    -- Dos periodos se solapan si: inicio1 < fin2 Y inicio2 < fin1
     SELECT COUNT(*)
     INTO v_vacaciones_solapadas
     FROM VACACIONES
@@ -86,8 +86,8 @@ BEGIN
         );
     END IF;
     
-    -- 4. Check for guard duty conflicts (Restriction #11)
-    -- A doctor cannot be on guard if they are on vacation that day
+    -- 4. Revisar conflictos de guardias (Restriccion #11)
+    -- Un medico no puede estar de guardia si esta de vacaciones ese dia
     SELECT COUNT(*)
     INTO v_guardias_conflicto
     FROM GUARDIA
@@ -103,11 +103,11 @@ BEGIN
         );
     END IF;
     
-    -- 5. Insert the vacation
+    -- 5. Insertar las vacaciones
     INSERT INTO VACACIONES (matricula, fecha_inicio, fecha_fin)
     VALUES (v_matricula, v_fecha_inicio, v_fecha_fin);
     
-    -- Commit the transaction
+    -- Hacer commit de la transaccion
     COMMIT;
     
     DBMS_OUTPUT.PUT_LINE('===================================');
@@ -120,7 +120,7 @@ BEGIN
     
 EXCEPTION
     WHEN OTHERS THEN
-        -- Rollback on any error
+        -- Rollback ante cualquier error
         ROLLBACK TO inicio_transaccion;
         DBMS_OUTPUT.PUT_LINE('===================================');
         DBMS_OUTPUT.PUT_LINE('TRANSACCION REVERTIDA');
@@ -128,7 +128,7 @@ EXCEPTION
         DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
         DBMS_OUTPUT.PUT_LINE('Codigo de error: ' || SQLCODE);
         
-        -- Special handling for serialization conflicts
+        -- Manejo especial para conflictos de serializacion
         IF SQLCODE = -8177 THEN
             DBMS_OUTPUT.PUT_LINE('');
             DBMS_OUTPUT.PUT_LINE('NOTA: Conflicto de serializacion detectado.');
@@ -142,9 +142,9 @@ END;
 /
 
 -- =========================================================
--- Additional query: Check existing vacations for a doctor
+-- Consulta adicional: Ver vacaciones existentes para un medico
 -- =========================================================
--- Uncomment to see existing vacations
+-- Descomentar para ver vacaciones existentes
 /*
 SELECT 
     v.matricula,
@@ -162,9 +162,9 @@ ORDER BY v.fecha_inicio;
 */
 
 -- =========================================================
--- Additional query: Check guardias during a period
+-- Consulta adicional: Ver guardias durante un periodo
 -- =========================================================
--- Uncomment to check if a doctor has guardias in a specific period
+-- Descomentar para ver si un medico tiene guardias en un periodo especifico
 /*
 SELECT 
     g.nro_guardia,

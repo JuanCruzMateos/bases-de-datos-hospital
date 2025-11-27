@@ -232,6 +232,38 @@ Bloquea el borrado cuando:
 
 ---
 
+### 4.5. `trg_int_paciente_medico_distintos`
+
+- BEFORE INSERT / UPDATE OF `tipo_documento`, `nro_documento`, `matricula` ON `INTERNACION`.
+- Impide que el medico principal sea la misma persona que el paciente (errores -20001 / -20002).
+
+### 4.6. `tr_medico_cuil_dni`
+
+- BEFORE INSERT / UPDATE OF `tipo_documento`, `cuil_cuit` ON `MEDICO`.
+- Si el tipo_doc es `DNI`, obliga a que el `cuil_cuit` contenga el numero de documento (error -20001).
+
+### 4.7. `tr_internacion_unica_activa`
+
+- BEFORE INSERT / UPDATE OF `fecha_fin` ON `INTERNACION`.
+- Evita que un paciente tenga mas de una internacion activa (cuenta otras activas y lanza -20050).
+
+### 4.8. `tr_medico_especialidad_sector_ubica`
+
+- BEFORE INSERT ON `SE_UBICA`.
+- Valida que el medico principal tenga alguna especialidad en el sector de la habitacion donde se ubica al paciente (errores -20051 / -20052).
+
+### 4.9. `tr_medico_especialidad_sector_int`
+
+- BEFORE INSERT / UPDATE OF `matricula` ON `INTERNACION`.
+- Si la internacion ya tiene ubicaciones, verifica que el medico asignado tenga especialidad en el sector de la habitacion actual (errores -20053 / -20054).
+
+### 4.10. `tr_guardia_no_vacaciones`
+
+- BEFORE INSERT / UPDATE OF `matricula`, `fecha_hora` ON `GUARDIA`.
+- Bloquea asignar una guardia a un medico que esta de vacaciones en esa fecha (error -20110).
+
+---
+
 ## 5. Resumen final
 
 - **Camas**
@@ -252,6 +284,8 @@ Bloquea el borrado cuando:
 - **Triggers** garantizan que:
   - El estado de las camas sea coherente con `SE_UBICA` e `INTERNACION`.
   - Las habitaciones con historial no puedan eliminarse.
-  - Las guardias tengan auditoría automática.
+  - Las guardias tengan auditoría automática y no se asignen si el médico está de vacaciones.
+  - El médico principal sea distinto del paciente y el CUIL/CUIT contenga el DNI cuando corresponde.
+  - Un paciente no tenga dos internaciones activas.
+  - El médico principal tenga especialidad en el sector de la habitación asignada (al ubicar o al cambiar médico).
 
-Este documento resume la filosofía de altas, bajas y modificaciones del módulo de internaciones y ocupación de camas, alineando el modelo relacional con el funcionamiento esperado de un hospital real.
