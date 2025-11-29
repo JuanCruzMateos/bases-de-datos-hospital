@@ -4,8 +4,8 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
-import org.hospital.internacion.InternacionPaciente;
-import org.hospital.internacion.ComentarioVisita;
+import org.hospital.feature.internacion.domain.InternacionPaciente;
+import org.hospital.feature.internacion.domain.ComentarioVisita;
 
 /**
  * View panel for Visitas Medicas reports.

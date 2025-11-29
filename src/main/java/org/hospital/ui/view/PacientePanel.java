@@ -5,7 +5,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.time.LocalDate;
 import java.util.List;
-import org.hospital.paciente.Paciente;
+import org.hospital.feature.paciente.domain.Paciente;
 
 /**
  * View panel for Paciente (Patient) CRUD operations.

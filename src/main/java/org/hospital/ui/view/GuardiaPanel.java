@@ -5,10 +5,10 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.time.LocalDateTime;
 import java.util.List;
-import org.hospital.guardia.Guardia;
-import org.hospital.guardia.Turno;
-import org.hospital.medico.Especialidad;
-import org.hospital.medico.Medico;
+import org.hospital.feature.guardia.domain.Guardia;
+import org.hospital.feature.guardia.domain.Turno;
+import org.hospital.feature.medico.domain.Especialidad;
+import org.hospital.feature.medico.domain.Medico;
 
 /**
  * View panel for Guardia (Guard Shifts) CRUD operations.

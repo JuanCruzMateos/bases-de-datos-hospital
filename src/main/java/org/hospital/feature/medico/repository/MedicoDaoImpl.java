@@ -1,6 +1,5 @@
 package org.hospital.feature.medico.repository;
 
-import org.hospital.common.domain.Persona;
 import org.hospital.feature.medico.domain.Especialidad;
 import org.hospital.feature.medico.domain.Medico;
 import java.sql.Connection;
@@ -8,7 +7,7 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
+import java.sql.Types;  
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;

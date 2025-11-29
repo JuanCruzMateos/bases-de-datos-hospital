@@ -5,10 +5,6 @@ import org.hospital.feature.internacion.domain.Internacion;
 import org.hospital.feature.internacion.domain.SeUbica;
 import org.hospital.feature.internacion.repository.InternacionDao;
 import org.hospital.feature.internacion.repository.InternacionDaoImpl;
-import org.hospital.feature.medico.domain.Medico;
-import org.hospital.feature.paciente.domain.Paciente;
-import org.hospital.feature.internacion.domain.*;
-import org.hospital.feature.internacion.repository.*;
 
 import java.time.LocalDate;
 import java.util.List;

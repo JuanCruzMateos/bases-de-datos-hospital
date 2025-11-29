@@ -9,8 +9,6 @@ import org.hospital.feature.internacion.repository.HabitacionDao;
 import org.hospital.feature.internacion.repository.HabitacionDaoImpl;
 import org.hospital.feature.internacion.repository.SectorDao;
 import org.hospital.feature.internacion.repository.SectorDaoImpl;
-import org.hospital.feature.internacion.domain.*;
-import org.hospital.feature.internacion.repository.*;
 
 import java.util.List;
 import java.util.Optional;

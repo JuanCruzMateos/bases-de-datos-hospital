@@ -5,8 +5,8 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
 
-import org.hospital.internacion.Cama;
-import org.hospital.internacion.Habitacion;
+import org.hospital.feature.internacion.domain.Cama;
+import org.hospital.feature.internacion.domain.Habitacion;
 
 /**
  * View panel for Habitacion (Room) CRUD operations.

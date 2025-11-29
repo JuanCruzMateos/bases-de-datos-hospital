@@ -1,6 +1,5 @@
 package org.hospital.feature.paciente.repository;
 
-import org.hospital.common.domain.Persona;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;

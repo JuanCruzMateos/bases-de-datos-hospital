@@ -2,11 +2,8 @@ package org.hospital.feature.internacion.service;
 
 import org.hospital.feature.internacion.domain.CamaDisponibleDetalle;
 import org.hospital.feature.internacion.domain.CamaDisponibleResumen;
-import org.hospital.feature.internacion.domain.Sector;
 import org.hospital.feature.internacion.repository.CamaDisponibleDao;
 import org.hospital.feature.internacion.repository.CamaDisponibleDaoImpl;
-import org.hospital.feature.internacion.domain.*;
-import org.hospital.feature.internacion.repository.*;
 
 import java.util.List;
 import java.util.logging.Logger;

@@ -4,7 +4,7 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
-import org.hospital.internacion.Internacion;
+import org.hospital.feature.internacion.domain.Internacion;
 
 /**
  * View panel for Internacion (Hospitalization) CRUD operations.

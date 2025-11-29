@@ -1,6 +1,5 @@
 package org.hospital.feature.medico.ui;
 
-import org.hospital.feature.guardia.domain.Guardia;
 import org.hospital.feature.medico.ui.MedicoPanel;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;

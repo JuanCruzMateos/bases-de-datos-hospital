@@ -1,6 +1,5 @@
 package org.hospital.feature.medico.repository;
 
-import org.hospital.feature.medico.domain.Medico;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;

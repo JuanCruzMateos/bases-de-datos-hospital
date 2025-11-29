@@ -4,8 +4,8 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
-import org.hospital.internacion.CamaDisponibleResumen;
-import org.hospital.internacion.CamaDisponibleDetalle;
+import org.hospital.feature.internacion.domain.CamaDisponibleResumen;
+import org.hospital.feature.internacion.domain.CamaDisponibleDetalle;
 
 /**
  * View panel for Camas Disponibles reports.

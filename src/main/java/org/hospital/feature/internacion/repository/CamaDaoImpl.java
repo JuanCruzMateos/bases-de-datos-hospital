@@ -1,7 +1,6 @@
 package org.hospital.feature.internacion.repository;
 
 import org.hospital.feature.internacion.domain.Cama;
-import org.hospital.feature.internacion.domain.Habitacion;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

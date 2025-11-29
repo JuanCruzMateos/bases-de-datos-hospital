@@ -1,7 +1,6 @@
 package org.hospital.feature.internacion.ui;
 
 import org.hospital.feature.internacion.ui.VisitasMedicasPanel;
-import org.hospital.feature.paciente.domain.Paciente;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;

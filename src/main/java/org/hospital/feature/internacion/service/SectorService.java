@@ -3,8 +3,6 @@ package org.hospital.feature.internacion.service;
 import org.hospital.feature.internacion.domain.Sector;
 import org.hospital.feature.internacion.repository.SectorDao;
 import org.hospital.feature.internacion.repository.SectorDaoImpl;
-import org.hospital.feature.internacion.domain.*;
-import org.hospital.feature.internacion.repository.*;
 
 import java.util.List;
 import java.util.Optional;

@@ -4,7 +4,7 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
-import org.hospital.internacion.Sector;
+import org.hospital.feature.internacion.domain.Sector;
 
 /**
  * View panel for Sector CRUD operations.

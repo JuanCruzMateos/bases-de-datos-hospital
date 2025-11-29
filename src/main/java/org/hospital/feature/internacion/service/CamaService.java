@@ -1,7 +1,6 @@
 package org.hospital.feature.internacion.service;
 
 import org.hospital.feature.internacion.domain.Cama;
-import org.hospital.feature.internacion.domain.Habitacion;
 import org.hospital.feature.internacion.domain.SeUbica;
 import org.hospital.feature.internacion.repository.CamaDao;
 import org.hospital.feature.internacion.repository.CamaDaoImpl;
@@ -9,8 +8,6 @@ import org.hospital.feature.internacion.repository.HabitacionDao;
 import org.hospital.feature.internacion.repository.HabitacionDaoImpl;
 import org.hospital.feature.internacion.repository.SeUbicaDao;
 import org.hospital.feature.internacion.repository.SeUbicaDaoImpl;
-import org.hospital.feature.internacion.domain.*;
-import org.hospital.feature.internacion.repository.*;
 
 import java.time.LocalDateTime;
 import java.util.List;

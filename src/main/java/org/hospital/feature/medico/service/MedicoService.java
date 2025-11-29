@@ -6,8 +6,6 @@ import org.hospital.feature.medico.repository.EspecialidadDao;
 import org.hospital.feature.medico.repository.EspecialidadDaoImpl;
 import org.hospital.feature.medico.repository.MedicoDao;
 import org.hospital.feature.medico.repository.MedicoDaoImpl;
-import org.hospital.feature.medico.domain.*;
-import org.hospital.feature.medico.repository.*;
 
 import java.util.HashSet;
 import java.util.List;

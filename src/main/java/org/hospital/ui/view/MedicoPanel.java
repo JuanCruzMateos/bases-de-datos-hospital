@@ -11,8 +11,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import javax.imageio.ImageIO;
-import org.hospital.medico.Especialidad;
-import org.hospital.medico.Medico;
+import org.hospital.feature.medico.domain.Especialidad;
+import org.hospital.feature.medico.domain.Medico;
 
 /**
  * View panel for Medico (Doctor) CRUD operations with Especialidad management.

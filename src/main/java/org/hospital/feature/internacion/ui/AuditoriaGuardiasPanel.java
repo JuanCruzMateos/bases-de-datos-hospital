@@ -1,9 +1,6 @@
 package org.hospital.feature.internacion.ui;
 
-import org.hospital.feature.guardia.domain.Guardia;
-import org.hospital.feature.guardia.domain.Turno;
 import org.hospital.feature.internacion.ui.AuditoriaGuardiasPanel;
-import org.hospital.feature.medico.domain.Especialidad;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;

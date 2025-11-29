@@ -4,8 +4,6 @@ import org.hospital.feature.internacion.domain.ComentarioVisita;
 import org.hospital.feature.internacion.domain.InternacionPaciente;
 import org.hospital.feature.internacion.repository.VisitasMedicasDao;
 import org.hospital.feature.internacion.repository.VisitasMedicasDaoImpl;
-import org.hospital.feature.internacion.domain.*;
-import org.hospital.feature.internacion.repository.*;
 
 import java.util.List;
 import java.util.logging.Logger;

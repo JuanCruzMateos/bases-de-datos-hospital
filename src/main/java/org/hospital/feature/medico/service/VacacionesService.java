@@ -3,8 +3,6 @@ package org.hospital.feature.medico.service;
 import org.hospital.feature.medico.domain.Vacaciones;
 import org.hospital.feature.medico.repository.VacacionesDao;
 import org.hospital.feature.medico.repository.VacacionesDaoImpl;
-import org.hospital.feature.medico.domain.*;
-import org.hospital.feature.medico.repository.*;
 
 import java.time.LocalDate;
 import java.util.List;

@@ -3,8 +3,6 @@ package org.hospital.feature.internacion.service;
 import org.hospital.feature.internacion.domain.AuditoriaGuardia;
 import org.hospital.feature.internacion.repository.AuditoriaGuardiasDao;
 import org.hospital.feature.internacion.repository.AuditoriaGuardiasDaoImpl;
-import org.hospital.feature.internacion.domain.*;
-import org.hospital.feature.internacion.repository.*;
 
 import java.sql.Timestamp;
 import java.util.List;

@@ -1,7 +1,5 @@
 package org.hospital.feature.internacion.ui;
 
-import org.hospital.feature.internacion.domain.Cama;
-import org.hospital.feature.internacion.ui.InternacionPanel;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
