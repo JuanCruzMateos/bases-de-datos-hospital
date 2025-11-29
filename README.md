@@ -168,18 +168,18 @@ The application follows a **strict layered architecture** with clear separation 
 │                    PRESENTATION LAYER (UI)                      │
 │                     org.hospital.ui.view                        │
 │                                                                 │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐        │
-│  │PacientePanel │  │ MedicoPanel  │  │InternacPanel │  ...   │
-│  │  (Swing UI)  │  │  (Swing UI)  │  │  (Swing UI)  │        │
-│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘        │
-│         │                  │                  │                 │
-│  ┌──────▼──────────────────▼──────────────────▼───────┐       │
-│  │            Controllers (MVC Pattern)                │       │
-│  │       feature/*/controller/*Controller.java         │       │
-│  │  • Handle user actions                              │       │
-│  │  • Coordinate between View and Service              │       │
-│  │  • Data transformation (View ↔ Domain)              │       │
-│  └──────────────────────────┬──────────────────────────┘       │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐           │
+│  │PacientePanel │  │ MedicoPanel  │  │InternacPanel │  ...      │
+│  │  (Swing UI)  │  │  (Swing UI)  │  │  (Swing UI)  │           │
+│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘           │
+│         │                 │                 │                   │
+│  ┌──────▼─────────────────▼─────────────────▼─────────┐         │
+│  │            Controllers (MVC Pattern)               │         │
+│  │       feature/*/controller/*Controller.java        │         │
+│  │  • Handle user actions                             │         │
+│  │  • Coordinate between View and Service             │         │
+│  │  • Data transformation (View ↔ Domain)             │         │
+│  └──────────────────────────┬─────────────────────────┘         │
 └─────────────────────────────┼───────────────────────────────────┘
                               │
 ┌─────────────────────────────▼───────────────────────────────────┐
@@ -214,7 +214,7 @@ The application follows a **strict layered architecture** with clear separation 
                               │
 ┌─────────────────────────────▼───────────────────────────────────┐
 │                      ORACLE DATABASE                            │
-│  Tables │ Stored Procedures │ Triggers │ Indexes │ Constraints │
+│  Tables │ Stored Procedures │ Triggers │ Indexes │ Constraints  │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
