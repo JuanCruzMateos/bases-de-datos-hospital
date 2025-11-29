@@ -1,5 +1,6 @@
 package org.hospital;
 
+import org.hospital.common.config.LoggerConfig;
 import org.hospital.ui.HospitalUI;
 
 /**
@@ -8,6 +9,7 @@ import org.hospital.ui.HospitalUI;
  */
 public class AppUI {
     public static void main(String[] args) {
+        LoggerConfig.init();
         // Launch the UI
         HospitalUI.main(args);
     }

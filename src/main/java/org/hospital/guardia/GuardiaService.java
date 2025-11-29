@@ -2,6 +2,7 @@ package org.hospital.guardia;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
@@ -13,8 +14,6 @@ import org.hospital.medico.MedicoDao;
 import org.hospital.medico.MedicoDaoImpl;
 import org.hospital.medico.SeEspecializaEnDao;
 import org.hospital.medico.SeEspecializaEnDaoImpl;
-import org.hospital.medico.VacacionesDao;
-import org.hospital.medico.VacacionesDaoImpl;
 
 /**
  * Service layer for Guardia business logic.
@@ -24,18 +23,15 @@ public class GuardiaService {
     private final GuardiaDao guardiaDao;
     private final MedicoDao medicoDao;
     private final SeEspecializaEnDao seEspecializaEnDao;
-    private final VacacionesDao vacacionesDao;
 
-    public GuardiaService(GuardiaDao guardiaDao, MedicoDao medicoDao, SeEspecializaEnDao seEspecializaEnDao, 
-                         VacacionesDao vacacionesDao) {
+    public GuardiaService(GuardiaDao guardiaDao, MedicoDao medicoDao, SeEspecializaEnDao seEspecializaEnDao) {
         this.guardiaDao = guardiaDao;
         this.medicoDao = medicoDao;
         this.seEspecializaEnDao = seEspecializaEnDao;
-        this.vacacionesDao = vacacionesDao;
     }
 
     public GuardiaService() {
-        this(new GuardiaDaoImpl(), new MedicoDaoImpl(), new SeEspecializaEnDaoImpl(), new VacacionesDaoImpl());
+        this(new GuardiaDaoImpl(), new MedicoDaoImpl(), new SeEspecializaEnDaoImpl());
     }
 
     /**
@@ -123,10 +119,10 @@ public class GuardiaService {
             throw new IllegalArgumentException("Fecha hora cannot be null");
         }
 
-        // LocalDateTime oneYearAgo = LocalDateTime.now().minusYears(1);
-        // if (guardia.getFechaHora().isBefore(oneYearAgo)) {
-        //     throw new IllegalArgumentException("Fecha hora cannot be more than 1 year in the past");
-        // }
+        LocalDateTime oneYearAgo = LocalDateTime.now().minusYears(1);
+        if (guardia.getFechaHora().isBefore(oneYearAgo)) {
+            throw new IllegalArgumentException("Fecha hora cannot be more than 1 year in the past");
+        }
 
         LocalDateTime sixMonthsAhead = LocalDateTime.now().plusMonths(6);
         if (guardia.getFechaHora().isAfter(sixMonthsAhead)) {
@@ -265,22 +261,60 @@ public class GuardiaService {
 
     /**
      * Evita guardias durante el periodo de vacaciones configurado del medico.
-     * Checks the VACACIONES table to see if the medico is on vacation on the guardia date.
      */
     private void validateMedicoFueraDeVacaciones(Guardia nueva, Medico medico) {
-        LocalDate fechaGuardia = nueva.getFechaHora().toLocalDate();
-        
-        try {
-            boolean onVacation = vacacionesDao.isOnVacation(medico.getMatricula(), fechaGuardia);
-            if (onVacation) {
+        String periodoVacaciones = medico.getPeriodoVacaciones();
+        Month mesVacaciones = parseSpanishMonth(periodoVacaciones);
+        if (mesVacaciones == null) {
+            return;
+        }
+
+        Month mesGuardia = nueva.getFechaHora().getMonth();
+        if (mesGuardia.equals(mesVacaciones)) {
+            String etiqueta = periodoVacaciones.trim();
+            throw new IllegalArgumentException(
+                    "El medico esta de vacaciones en " + etiqueta
+                            + " y no puede tomar guardias en ese periodo."
+            );
+        }
+    }
+
+    private Month parseSpanishMonth(String periodoVacaciones) {
+        if (periodoVacaciones == null) {
+            return null;
+        }
+        String normalized = periodoVacaciones.trim();
+        if (normalized.isEmpty()) {
+            return null;
+        }
+        switch (normalized.toUpperCase()) {
+            case "ENERO":
+                return Month.JANUARY;
+            case "FEBRERO":
+                return Month.FEBRUARY;
+            case "MARZO":
+                return Month.MARCH;
+            case "ABRIL":
+                return Month.APRIL;
+            case "MAYO":
+                return Month.MAY;
+            case "JUNIO":
+                return Month.JUNE;
+            case "JULIO":
+                return Month.JULY;
+            case "AGOSTO":
+                return Month.AUGUST;
+            case "SEPTIEMBRE":
+                return Month.SEPTEMBER;
+            case "OCTUBRE":
+                return Month.OCTOBER;
+            case "NOVIEMBRE":
+                return Month.NOVEMBER;
+            case "DICIEMBRE":
+                return Month.DECEMBER;
+            default:
                 throw new IllegalArgumentException(
-                        "El medico esta de vacaciones el " + fechaGuardia
-                                + " y no puede tomar guardias en ese periodo."
-                );
-            }
-        } catch (DataAccessException e) {
-            logger.warning("Error checking vacation status for medico " + medico.getMatricula() + ": " + e.getMessage());
-            // Continue without blocking the guardia creation if we can't check vacations
+                        "Periodo de vacaciones invalido para el medico: " + periodoVacaciones);
         }
     }
 }

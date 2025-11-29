@@ -11,152 +11,299 @@
 
 ---
 
+## 📋 Project Status
+
+Full-stack hospital management system with **Oracle Database**, **Java Swing UI**, and **layered architecture**.
+
+**Current Version:** 1.0-SNAPSHOT ✅
+
+**Core Features:**
+- Complete CRUD operations for all entities (Patients, Doctors, Internments, Guards, Rooms, Sectors)
+- 5 stored procedures: available beds, internments, guard audits, visit comments, vacation management
+- Triggers and indexes for data integrity and performance
+- Transaction management with rollback support
+- Comprehensive logging system
+
+**Tech Stack:**
+- Java 8 + Swing (MVC pattern)
+- Oracle Database Free (Docker container)
+- JDBC + manual transaction control
+- Maven build system
+
+---
+
 ## 🚀 Quick Start
 
-Launch the Hospital Management System UI:
-
 ```bash
+# Start database
+docker compose up -d
+
+# Launch application
+mvn clean package
 ./launch-ui.sh
 ```
 
-Or run the JAR directly:
-```bash
-java -jar target/hospital-1.0-SNAPSHOT.jar
+---
+
+## 🗄️ Database
+
+### Database Schema (Simplified)
+
 ```
+    ┌─────────────┐
+    │   PERSONA   │
+    │─────────────│
+    │ nro_doc (PK)│
+    │ nombre      │
+    │ apellido    │
+    │ ...         │
+    └──────┬──────┘
+           │
+           ├─────────────────┐
+           │                 │
+    ┌──────▼──────┐   ┌──────▼──────┐
+    │  PACIENTE   │   │   MEDICO    │
+    │─────────────│   │─────────────│
+    │ nro_doc (PK)│   │ nro_doc (PK)│
+    │ nro_hist_cl │   │ matricula   │
+    │ edad        │   │ max_guardias│
+    └──────┬──────┘   └──────┬──────┘
+           │                 │
+           │                 │ ┌──────────────┐
+           │                 ├─┤ ESPECIALIDAD │
+           │                 │ │──────────────│
+           │                 │ │ id_esp  (PK) │
+           │                 │ │ descripcion  │
+           │                 │ └──────────────┘
+           │                 │
+           │         ┌───────▼─────────┐
+           │         │   VACACIONES    │
+           │         │─────────────────│
+           │         │ id_vacaciones   │
+           │         │ desde / hasta   │
+           │         │ nro_doc_medico  │
+           │         └─────────────────┘
+           │
+    ┌──────▼──────────┐        ┌─────────────┐
+    │  INTERNACION    │◄───────┤    CAMA     │
+    │─────────────────│        │─────────────│
+    │ id_intern  (PK) │        │ id_cama (PK)│
+    │ fecha_ingreso   │        │ nro_habitac │
+    │ fecha_egreso    │        │ disponible  │
+    │ nro_doc_pacient │        └──────┬──────┘
+    │ nro_doc_medico  │               │
+    └─────────────────┘               │
+                                ┌─────▼──────┐
+    ┌─────────────┐             │ HABITACION │
+    │   GUARDIA   │             │────────────│
+    │─────────────│             │ nro_habitac│
+    │ id_guardia  │             │ id_sector  │
+    │ fecha_desde │             │ piso       │
+    │ fecha_hasta │             │ orientacion│
+    │ nro_doc_med │             └──────┬─────┘
+    │ id_turno    │                    │
+    └─────────────┘              ┌─────▼─────┐
+                                 │  SECTOR   │
+                                 │───────────│
+                                 │ id_sector │
+                                 │ descripcion│
+                                 └───────────┘
+
+    Stored Procedures:
+    ├─ sp_camas_disponibles      (Available beds by sector/floor)
+    ├─ sp_internaciones          (Internment management)
+    ├─ sp_auditoria_guardias     (Guard shift audits)
+    ├─ sp_comentarios_visitas    (Medical visit comments)
+    └─ sp_vacaciones             (Vacation management + validation)
+```
+
+### Connection Info
+
+**Connection (Docker):**
+```bash
+docker exec -it oracle-hospital sqlplus hospital/hospital123@//localhost:1521/FREEPDB1
+```
+
+**Schema Initialization:** Auto-runs on container start (`db_scripts/init/`)
+- Tables with PKs and FKs
+- Indexes for performance
+- Triggers for data integrity
+- Initial sample data
+- 5 stored procedures
+
+**DBeaver Config:** `localhost:1521/FREEPDB1` · User: `hospital` · Pass: `hospital123`
+
+---
+
+## 🏛️ Architecture
+
+### Layered Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                      PRESENTATION LAYER                         │
+│                                                                 │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐        │
+│  │  Swing View  │  │  Swing View  │  │  Swing View  │  ...   │
+│  │   (Panel)    │  │   (Panel)    │  │   (Panel)    │        │
+│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘        │
+│         │                  │                  │                 │
+│  ┌──────▼──────────────────▼──────────────────▼───────┐       │
+│  │              Controllers (MVC)                      │       │
+│  │       feature/*/ui/*Controller.java                 │       │
+│  └──────────────────────────┬──────────────────────────┘       │
+└─────────────────────────────┼───────────────────────────────────┘
+                              │
+┌─────────────────────────────▼───────────────────────────────────┐
+│                      SERVICE LAYER                              │
+│                   feature/*/service/*Service.java               │
+│                                                                 │
+│  • Business Logic & Validation                                  │
+│  • Cross-entity validation                                      │
+│  • Transaction coordination                                     │
+└─────────────────────────────┼───────────────────────────────────┘
+                              │
+┌─────────────────────────────▼───────────────────────────────────┐
+│                    DATA ACCESS LAYER (DAO)                      │
+│                  feature/*/repository/*Dao*.java                │
+│                                                                 │
+│  • CRUD Operations + Manual Transactions                        │
+│  • PreparedStatements (SQL injection safe)                      │
+│  • setAutoCommit(false) → execute → commit/rollback             │
+└─────────────────────────────┼───────────────────────────────────┘
+                              │
+                        ┌─────▼──────┐
+                        │    JDBC    │
+                        │ DriverMgr  │
+                        └─────┬──────┘
+                              │
+┌─────────────────────────────▼───────────────────────────────────┐
+│                      ORACLE DATABASE                            │
+│  Tables │ Stored Procedures │ Triggers │ Indexes │ Constraints │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Feature Module Pattern
+
+Each feature (`paciente`, `medico`, `internacion`, `guardia`) follows:
+
+```
+feature/{name}/
+├── domain/          # Business entities
+├── repository/      # Data access (DAO)
+├── service/         # Business logic
+└── ui/              # Controllers & Views
+```
+
+---
+
+## 📁 Project Structure
+
+**Package-by-Feature Architecture** - Production-ready organization:
+
+```
+hospital/
+├── 📦 src/main/java/org/hospital/
+│   ├── AppUI.java                    # Main entry point
+│   │
+│   ├── common/                       # Shared components
+│   │   ├── config/
+│   │   │   ├── DatabaseConfig.java   # JDBC connection manager
+│   │   │   └── LoggerConfig.java     # Logging configuration
+│   │   ├── exception/
+│   │   │   └── DataAccessException.java
+│   │   └── domain/
+│   │       └── Persona.java          # Base entity
+│   │
+│   ├── feature/                      # Feature modules
+│   │   ├── paciente/                 # Patient management
+│   │   │   ├── domain/
+│   │   │   │   └── Paciente.java
+│   │   │   ├── repository/
+│   │   │   │   ├── PacienteDao.java
+│   │   │   │   └── PacienteDaoImpl.java
+│   │   │   ├── service/
+│   │   │   │   └── PacienteService.java
+│   │   │   └── ui/
+│   │   │       ├── PacienteController.java
+│   │   │       └── PacientePanel.java
+│   │   │
+│   │   ├── medico/                   # Doctor management
+│   │   │   ├── domain/
+│   │   │   │   ├── Medico.java
+│   │   │   │   ├── Especialidad.java
+│   │   │   │   └── Vacaciones.java
+│   │   │   ├── repository/
+│   │   │   ├── service/
+│   │   │   └── ui/
+│   │   │
+│   │   ├── internacion/              # Hospitalization
+│   │   │   ├── domain/
+│   │   │   │   ├── Internacion.java
+│   │   │   │   ├── Cama.java
+│   │   │   │   ├── Habitacion.java
+│   │   │   │   └── Sector.java
+│   │   │   ├── repository/
+│   │   │   ├── service/
+│   │   │   └── ui/
+│   │   │
+│   │   └── guardia/                  # Guard shifts
+│   │       ├── domain/
+│   │       │   ├── Guardia.java
+│   │       │   └── Turno.java
+│   │       ├── repository/
+│   │       ├── service/
+│   │       └── ui/
+│   │
+│   └── ui/                           # Main UI components
+│       ├── HospitalUI.java           # Main window
+│       └── common/
+│           └── BaseController.java
+│
+├── 🗄️ db_scripts/
+│   ├── init/                         # Auto-run on Docker start
+│   │   ├── 02-create-tables-pk.sql
+│   │   ├── 04-init-db.sql           # Sample data
+│   │   ├── 05-triggers.sql
+│   │   └── 06-indexes.sql
+│   └── procedures/                   # Stored Procedures
+│       ├── sp_camas_disponibles.sql
+│       ├── sp_internaciones.sql
+│       ├── sp_auditoria_guardias.sql
+│       ├── sp_comentarios_visitas.sql
+│       └── sp_vacaciones.sql
+│
+├── compose.yml                       # Docker Oracle setup
+├── pom.xml                           # Maven config (Java 8)
+└── launch-ui.sh                      # Quick start script
+```
+
+**Architecture Benefits:**
+- ✅ **Feature cohesion** - All code for a feature in one place
+- ✅ **Clear boundaries** - Easy to understand and navigate
+- ✅ **Scalability** - Can evolve features independently
+- ✅ **Production-ready** - Industry standard pattern
 
 ---
 
 ## 📚 Documentation
 
-### For Users
-- **[SWING_UI_QUICK_START.md](SWING_UI_QUICK_START.md)** - Get started with the UI in 2 minutes ⚡
-- **[PROJECT_COMPLETE.md](PROJECT_COMPLETE.md)** - Full project overview
-
-### For Developers
-- **[UI_DOCUMENTATION.md](UI_DOCUMENTATION.md)** - Complete Swing UI guide (MVC pattern)
-- **[STORED_PROCEDURES_IMPLEMENTATION.md](STORED_PROCEDURES_IMPLEMENTATION.md)** - Stored procedures integration guide ⭐
-- **[CRUD_DOCUMENTATION.md](CRUD_DOCUMENTATION.md)** - Complete DAO and data access documentation
-- **[modelo-relacional.md](modelo-relacional.md)** - Database schema and relational model
-- **[SWING_UI_SUMMARY.md](SWING_UI_SUMMARY.md)** - UI implementation summary
-- **[CRUD_SUMMARY.md](CRUD_SUMMARY.md)** - DAO implementation summary
+**Developer Guides:**
+- [ARCHITECTURE.md](markdown/ARCHITECTURE.md) - Complete architecture overview
+- [modelo-relacional.md](modelo-relacional.md) - Database schema and ER model
+- [Stored-Procedures y Triggers.md](markdown/Stored-Procedures%20y%20Triggers.md) - SP implementation
+- [Indices.md](markdown/Indices.md) - Index strategy
 
 ---
 
-## 🗄️ Database Setup
+## 📖 Resources
 
-### Using Docker (Recommended)
+**Oracle:** [SQL Reference](https://docs.oracle.com/en/database/oracle/oracle-database/19/sqlrf/) · [Live SQL](https://www.oracle.com/database/technologies/oracle-live-sql/)
 
-```bash
-# Start Oracle database container
-docker compose up -d
-
-# Connect to database
-docker exec -it oracle-hospital sqlplus hospital/hospital123@//localhost:1521/FREEPDB1
-```
-
-### Initialize Database
-
-Run the initialization scripts in order:
-
-```bash
-cd db_scripts/init
-# 1. Create user
-sqlplus sys/password@//localhost:1521/FREEPDB1 as sysdba @00-create-user.sql
-# 2. Drop existing tables
-sqlplus hospital/hospital123@//localhost:1521/FREEPDB1 @01-drop-tables.sql
-# 3. Create tables
-sqlplus hospital/hospital123@//localhost:1521/FREEPDB1 @02-create-tables-pk.sql
-# 4. Define constraints
-sqlplus hospital/hospital123@//localhost:1521/FREEPDB1 @03-define-fk-constrains.sql
-# 5. Initialize data
-sqlplus hospital/hospital123@//localhost:1521/FREEPDB1 @04-init-db.sql
-```
-
-### Database Connection (DBeaver)
-- **User:** hospital
-- **Password:** hospital123
-- **Service Name:** FREEPDB1
-- **Host:** localhost
-- **Port:** 1521
-
----
-
-## 🔧 Configuration
-
-Edit `src/main/resources/application.properties`:
-
-```properties
-db.url=jdbc:oracle:thin:@localhost:1521/FREEPDB1
-db.user=hospital
-db.password=hospital123
-```
-
----
-
-## 🎯 Usage Guide
-
-### Launching the Application
-
-**Using the launch script:**
-```bash
-./launch-ui.sh
-```
-
-**Or run the JAR directly:**
-```bash
-java -jar target/hospital-1.0-SNAPSHOT.jar
-```
-
-
-## 🏛️ Architecture
-
-### MVC Pattern (Swing UI)
-```
-┌──────────────┐     ┌──────────────┐     ┌──────────────┐
-│     View     │────▶│  Controller  │────▶│    Model     │
-│   (Panel)    │◀────│   (Logic)    │◀────│   (DAO)      │
-└──────────────┘     └──────────────┘     └──────────────┘
-```
-
-### DAO Pattern (Data Access)
-```
-┌──────────────┐     ┌──────────────┐     ┌──────────────┐
-│  Controller  │────▶│   DAO Impl   │────▶│   Database   │
-│  or CLI      │◀────│  (CRUD ops)  │◀────│   (Oracle)   │
-└──────────────┘     └──────────────┘     └──────────────┘
-```
-
----
-
-## 📖 Additional Resources
-
-### Oracle Documentation
-- [SQL Reference](https://docs.oracle.com/en/database/oracle/oracle-database/19/sqlrf/toc.htm)
-- [Live SQL](https://www.oracle.com/database/technologies/oracle-live-sql/)
-- [Free SQL](https://freesql.com/)
-- [Container Registry](https://container-registry.oracle.com/ords/f?p=113:4:8843924309712:::4:P4_REPOSITORY,AI_REPOSITORY,AI_REPOSITORY_NAME,P4_REPOSITORY_NAME,P4_EULA_ID,P4_BUSINESS_AREA_ID:1863,1863,Oracle%20Database%20Free,Oracle%20Database%20Free,1,0&cs=3eoUjM-yDyac21yxmpGLVQVShx4ETDBJX8IZOB3uDaxo6UzmLf0zlojb_f0KK67YrnUASCWGldHZ_ntvGjKKpYA)
-
-### Project Documentation
-- See [modelo-relacional.md](modelo-relacional.md) for complete database schema
-- See [UI_DOCUMENTATION.md](UI_DOCUMENTATION.md) for MVC pattern details
-- See [CRUD_DOCUMENTATION.md](CRUD_DOCUMENTATION.md) for API documentation
-
----
-
-## 🤝 Contributing
-
-This project was developed as part of the Bases de Datos course at FI UNMdP.
-
-**Grupo 4 Members:**
-- Bonifazi, Paula
-- Mateos, Juan Cruz
-- Navarro, Pablo
-- Parise, Thiago
-- San Pedro, Gianfranco
+**Project Docs:** See `markdown/` folder for detailed specifications
 
 ---
 
 ## 📄 License
 
-Academic project for educational purposes.  
-Universidad Nacional de Mar del Plata - Facultad de Ingeniería
+Academic project - Universidad Nacional de Mar del Plata, Facultad de Ingeniería

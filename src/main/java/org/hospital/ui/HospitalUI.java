@@ -2,8 +2,29 @@ package org.hospital.ui;
 
 import javax.swing.*;
 import java.awt.*;
-import org.hospital.ui.controller.*;
-import org.hospital.ui.view.*;
+
+import org.hospital.feature.paciente.controller.PacienteController;
+import org.hospital.feature.paciente.ui.PacientePanel;
+
+// Medico
+import org.hospital.feature.medico.ui.MedicoController;
+import org.hospital.feature.medico.ui.MedicoPanel;
+import org.hospital.feature.medico.ui.VacacionesController;
+import org.hospital.feature.medico.ui.VacacionesPanel;
+import org.hospital.feature.guardia.controller.GuardiaController;
+import org.hospital.feature.guardia.ui.GuardiaPanel;
+import org.hospital.feature.internacion.ui.InternacionPanel;
+import org.hospital.feature.internacion.ui.HabitacionPanel;
+import org.hospital.feature.internacion.ui.CamaDisponiblePanel;
+import org.hospital.feature.internacion.ui.VisitasMedicasPanel;
+import org.hospital.feature.internacion.controller.AuditoriaGuardiasController;
+import org.hospital.feature.internacion.controller.CamaDisponibleController;
+import org.hospital.feature.internacion.controller.HabitacionController;
+import org.hospital.feature.internacion.controller.InternacionController;
+import org.hospital.feature.internacion.controller.SectorController;
+import org.hospital.feature.internacion.controller.SectorPanel;
+import org.hospital.feature.internacion.controller.VisitasMedicasController;
+import org.hospital.feature.internacion.ui.AuditoriaGuardiasPanel;
 
 /**
  * Main application window for Hospital Management System.
@@ -11,7 +32,7 @@ import org.hospital.ui.view.*;
  */
 public class HospitalUI extends JFrame {
     private JTabbedPane tabbedPane;
-    
+
     // View panels
     private PacientePanel pacientePanel;
     private MedicoPanel medicoPanel;
@@ -23,7 +44,7 @@ public class HospitalUI extends JFrame {
     private VisitasMedicasPanel visitasMedicasPanel;
     private AuditoriaGuardiasPanel auditoriaGuardiasPanel;
     private VacacionesPanel vacacionesPanel;
-    
+
     // Controllers - stored as fields to prevent garbage collection
     // Controllers manage listeners and must remain in scope
     // Suppressing "unused" warning as they ARE used (event listeners)
@@ -47,12 +68,12 @@ public class HospitalUI extends JFrame {
     private AuditoriaGuardiasController auditoriaGuardiasController;
     @SuppressWarnings("unused")
     private VacacionesController vacacionesController;
-    
+
     public HospitalUI() {
         initializeUI();
         initializeControllers();
     }
-    
+
     private void initializeUI() {
         setTitle("Hospital Management System");
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -64,18 +85,18 @@ public class HospitalUI extends JFrame {
         });
         setSize(1200, 700);
         setLocationRelativeTo(null);
-        
+
         // Create main panel
         JPanel mainPanel = new JPanel(new BorderLayout());
-        
+
         // Add header
         JPanel headerPanel = createHeaderPanel();
         mainPanel.add(headerPanel, BorderLayout.NORTH);
-        
+
         // Create tabbed pane
         tabbedPane = new JTabbedPane();
         tabbedPane.setFont(new Font("Arial", Font.BOLD, 14));
-        
+
         // Create view panels
         pacientePanel = new PacientePanel();
         medicoPanel = new MedicoPanel();
@@ -87,11 +108,13 @@ public class HospitalUI extends JFrame {
         visitasMedicasPanel = new VisitasMedicasPanel();
         auditoriaGuardiasPanel = new AuditoriaGuardiasPanel();
         vacacionesPanel = new VacacionesPanel();
-        
+
         // Add tabs
         tabbedPane.addTab("Camas Disponibles", new ImageIcon(), camaDisponiblePanel, "View Available Beds Reports");
-        tabbedPane.addTab("Visitas Médicas", new ImageIcon(), visitasMedicasPanel, "View Patient Internations & Visit Comments");
-        tabbedPane.addTab("Auditoría Guardias", new ImageIcon(), auditoriaGuardiasPanel, "View Guard Assignment Audit Trail");
+        tabbedPane.addTab("Visitas Médicas", new ImageIcon(), visitasMedicasPanel,
+                "View Patient Internations & Visit Comments");
+        tabbedPane.addTab("Auditoría Guardias", new ImageIcon(), auditoriaGuardiasPanel,
+                "View Guard Assignment Audit Trail");
         tabbedPane.addTab("Guardias", new ImageIcon(), guardiaPanel, "Manage Guard Shifts");
         tabbedPane.addTab("Vacaciones", new ImageIcon(), vacacionesPanel, "Manage Doctor Vacations");
         tabbedPane.addTab("Pacientes", new ImageIcon(), pacientePanel, "Manage Patients");
@@ -99,53 +122,53 @@ public class HospitalUI extends JFrame {
         tabbedPane.addTab("Sectores", new ImageIcon(), sectorPanel, "Manage Sectors");
         tabbedPane.addTab("Habitaciones", new ImageIcon(), habitacionPanel, "Manage Rooms");
         tabbedPane.addTab("Internaciones", new ImageIcon(), internacionPanel, "Manage Hospitalizations");
-        
+
         mainPanel.add(tabbedPane, BorderLayout.CENTER);
-        
+
         // Add footer
         JPanel footerPanel = createFooterPanel();
         mainPanel.add(footerPanel, BorderLayout.SOUTH);
-        
+
         add(mainPanel);
     }
-    
+
     private JPanel createHeaderPanel() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(new Color(41, 128, 185));
         panel.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
-        
+
         JLabel titleLabel = new JLabel("Hospital Management System");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
         titleLabel.setForeground(Color.WHITE);
-        
+
         JLabel subtitleLabel = new JLabel("Bases de Datos | FI UNMdP - Grupo 4");
         subtitleLabel.setFont(new Font("Arial", Font.PLAIN, 14));
         subtitleLabel.setForeground(new Color(236, 240, 241));
-        
+
         JPanel textPanel = new JPanel(new GridLayout(2, 1));
         textPanel.setOpaque(false);
         textPanel.add(titleLabel);
         textPanel.add(subtitleLabel);
-        
+
         panel.add(textPanel, BorderLayout.WEST);
-        
+
         return panel;
     }
-    
+
     private JPanel createFooterPanel() {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         panel.setBackground(new Color(236, 240, 241));
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        
+
         JLabel label = new JLabel("© 2024 Hospital Database System | Grupo 4 - FI UNMdP");
         label.setFont(new Font("Arial", Font.PLAIN, 12));
         label.setForeground(new Color(127, 140, 141));
-        
+
         panel.add(label);
-        
+
         return panel;
     }
-    
+
     private void initializeControllers() {
         // Initialize controllers for each view
         pacienteController = new PacienteController(pacientePanel);
@@ -159,7 +182,7 @@ public class HospitalUI extends JFrame {
         auditoriaGuardiasController = new AuditoriaGuardiasController(auditoriaGuardiasPanel);
         vacacionesController = new VacacionesController(vacacionesPanel);
     }
-    
+
     /**
      * Handle application shutdown.
      * V1: No cleanup needed (basic JDBC, no connection pool)
@@ -171,7 +194,7 @@ public class HospitalUI extends JFrame {
         dispose();
         System.exit(0);
     }
-    
+
     /**
      * Launch the application.
      */
@@ -182,7 +205,7 @@ public class HospitalUI extends JFrame {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        
+
         // Create and show the UI
         SwingUtilities.invokeLater(() -> {
             HospitalUI app = new HospitalUI();
@@ -190,4 +213,3 @@ public class HospitalUI extends JFrame {
         });
     }
 }
-

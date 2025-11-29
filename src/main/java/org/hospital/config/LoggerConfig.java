@@ -1,5 +1,7 @@
 package org.hospital.config;
 
+import java.io.InputStream;
+import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 public final class LoggerConfig {
@@ -9,7 +11,14 @@ public final class LoggerConfig {
     }
 
     public static void init() {
-        System.setProperty("java.util.logging.config.file", "logging.properties");
+        try (InputStream is = LoggerConfig.class.getClassLoader()
+                .getResourceAsStream("logging.properties")) {
+            if (is != null) {
+                LogManager.getLogManager().readConfiguration(is);
+            }
+        } catch (Exception e) {
+            System.err.println("Could not load logging.properties: " + e.getMessage());
+        }
         logger.info("Logger initialized");
     }
 }
