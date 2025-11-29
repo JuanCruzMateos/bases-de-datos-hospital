@@ -31,6 +31,11 @@ En términos conceptuales:
 > Una **internación** tiene muchas **ubicaciones** en `SE_UBICA`.  
 > Cada ubicación referencia una **cama**, dentro de una **habitación**, que a su vez pertenece a un **sector**.
 
+Nota sobre delete cascade en HABITACION y CAMA:
+
+- Aunque la FK CAMA.nro_habitacion -> HABITACION.nro_habitacion tiene ON DELETE CASCADE, el trigger `tr_habitacion_no_delete_if_used` impide borrar habitaciones con historial en SE_UBICA.  
+- En la practica, el borrado en cascada solo se aplica para habitaciones "nuevas", cuyas camas nunca fueron usadas en internaciones.
+
 El campo `CAMA.estado` se usa para marcar la disponibilidad (por ejemplo: `LIBRE`, `OCUPADA`, `FUERA_DE_SERVICIO`).
 
 ---
@@ -158,7 +163,7 @@ Reglas:
   - Inserta una nueva ubicación en `SE_UBICA` con la cama nueva (que pasa a `OCUPADA` vía trigger).
 
 - `sp_internaciones_paciente`  
-  Lista las internaciones de un paciente, con un campo `estado` (`EN CURSO` / `FINALIZADA`).
+  Lista las internaciones de un paciente y devuelve `nro_internacion`, `fecha_inicio` y `fecha_fin`; la columna `estado` se calcula en Java segun si `fecha_fin` es nula o no.
 
 - `sp_historial_ubicaciones_internacion`  
   Devuelve el historial de ubicaciones de una internación (habitaciones, camas, piso, orientación y sector).
@@ -185,6 +190,19 @@ Reglas:
 - `sp_auditoria_guardias`  
   Consulta la tabla `AUDITORIA_GUARDIA` con filtros por usuario y rango de fechas.  
   Devuelve tipo de operación, guardia afectada y valores antiguos/nuevos.
+
+---
+
+### 3.5. Vacaciones de medicos
+
+**Archivo:** `sp_vacaciones.sql`
+
+- `sp_agregar_vacaciones`  
+  Gestiona el alta de un periodo de vacaciones para un medico, aplicando las siguientes validaciones de negocio:  
+  - Las fechas de inicio y fin no pueden ser nulas y deben cumplir `fecha_inicio <= fecha_fin`.  
+  - El medico debe existir en las tablas `MEDICO` y `PERSONA`.  
+  - No se permiten vacaciones que se solapen con otras ya registradas para el mismo medico.  
+  - No se permiten vacaciones en fechas donde el medico tenga guardias cargadas en `GUARDIA`.
 
 ---
 

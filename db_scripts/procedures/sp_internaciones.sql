@@ -182,34 +182,7 @@ END;
 /
 
 -- =============================================================================
--- 3. Listado: internaciones de un paciente
--- =============================================================================
-
-CREATE OR REPLACE PROCEDURE sp_internaciones_paciente (
-    p_tipo_documento IN  INTERNACION.tipo_documento%TYPE,
-    p_nro_documento  IN  INTERNACION.nro_documento%TYPE,
-    p_resultado      OUT SYS_REFCURSOR
-) AS
-BEGIN
-    OPEN p_resultado FOR
-    SELECT
-        i.nro_internacion,
-        i.fecha_inicio,
-        i.fecha_fin,
-        CASE
-            WHEN i.fecha_fin IS NULL THEN 'EN CURSO'
-            ELSE 'FINALIZADA'
-        END AS estado
-    FROM INTERNACION i
-    WHERE i.tipo_documento = p_tipo_documento
-        AND i.nro_documento  = p_nro_documento
-    ORDER BY i.fecha_inicio DESC;
-END;
-/
-
-
--- =============================================================================
--- 4. Listado: historial de ubicaciones de una internación
+-- 3. Listado: historial de ubicaciones de una internación
 -- =============================================================================
 
 CREATE OR REPLACE PROCEDURE sp_historial_ubicaciones_internacion (

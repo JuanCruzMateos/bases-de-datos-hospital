@@ -8,6 +8,7 @@ Este documento describe la implementacion de las pestañas de UI que invocan sto
 - [Implementaciones](#implementaciones)
   - [1. Camas Disponibles](#1-camas-disponibles)
   - [2. Visitas Medicas](#2-visitas-medicas)
+  - [3. Auditoria de Guardias](#3-auditoria-de-guardias)
 - [Guia de uso](#guia-de-uso)
 - [Detalles tecnicos](#detalles-tecnicos)
 - [Compilacion y ejecucion](#compilacion-y-ejecucion)
@@ -56,8 +57,16 @@ Cada implementacion usa una arquitectura en capas:
 │  sp_camas_disponibles_*                     │
 │  sp_internaciones_paciente                  │
 │  sp_comentarios_visitas                     │
+│  sp_auditoria_guardias                      │
 └─────────────────────────────────────────────┘
 ```
+
+Stored procedures usados en estas capas:
+- sp_camas_disponibles_resumen
+- sp_camas_disponibles_detalle
+- sp_internaciones_paciente
+- sp_comentarios_visitas
+- sp_auditoria_guardias
 
 ### Componentes por implementacion
 
@@ -200,6 +209,58 @@ src/main/java/org/hospital/internacion/
 src/main/java/org/hospital/ui/
 ├─ view/VisitasMedicasPanel.java
 └─ controller/VisitasMedicasController.java
+```
+
+---
+
+### 3. Auditoria de Guardias
+
+Permite visualizar el historial de cambios sobre las guardias medicas registrado por los triggers de auditoria.
+
+#### Stored procedures invocados
+
+**`sp_auditoria_guardias`**
+- **Proposito**: devuelve registros de auditoria de la tabla `AUDITORIA_GUARDIA`.
+- **Parametros**:
+  - `p_usuario IN VARCHAR2` (usuario de base de datos, puede ser null para todos).
+  - `p_desde IN TIMESTAMP` (fecha y hora desde, opcional).
+  - `p_hasta IN TIMESTAMP` (fecha y hora hasta, opcional).
+  - `p_resultado OUT SYS_REFCURSOR` (cursor de salida).
+- **Devuelve**: `id_auditoria`, `fecha_hora_reg`, `usuario_bd`, `operacion`, `nro_guardia`, `fecha_hora_guard`, `matricula`, `cod_especialidad`, `id_turno`, `detalle_old`, `detalle_new`.
+
+#### Componentes creados
+
+**DTOs:**
+- `AuditoriaGuardia.java` (id, fechas, usuario, tipo de operacion, guardia, medico, especialidad, turno y detalles antes/despues).
+
+**Capa DAO:**
+- `AuditoriaGuardiasDao.java` (interfaz para el reporte).
+- `AuditoriaGuardiasDaoImpl.java` (implementacion JDBC que llama a `sp_auditoria_guardias` con filtros opcionales).
+
+**Capa Servicio:**
+- `AuditoriaGuardiasService.java` (valida el rango de fechas y delega al DAO).
+
+**Capa UI:**
+- `AuditoriaGuardiasPanel.java` (tabla con todos los campos de auditoria y boton Actualizar).
+- `AuditoriaGuardiasController.java` (carga inicial y recarga de datos al presionar Actualizar).
+
+#### Funcionalidades
+
+- **Carga inicial**: al abrir la pestana se cargan todos los registros de auditoria disponibles.
+- **Actualizacion manual**: boton **Actualizar** para recargar la informacion desde la base.
+- **Visualizacion detallada**: muestra para cada cambio el usuario, tipo de operacion (INSERT, UPDATE, DELETE), datos de la guardia afectada y los valores previos y nuevos.
+
+#### Ubicacion de codigo
+```
+src/main/java/org/hospital/feature/internacion/
+... domain/AuditoriaGuardia.java
+... repository/AuditoriaGuardiasDao.java
+... repository/AuditoriaGuardiasDaoImpl.java
+... service/AuditoriaGuardiasService.java
+
+src/main/java/org/hospital/ui/
+... view/AuditoriaGuardiasPanel.java
+... controller/AuditoriaGuardiasController.java
 ```
 
 ---
@@ -389,6 +450,7 @@ java -jar target/hospital-1.0-SNAPSHOT.jar
 - `sp_camas_disponibles_detalle`
 - `sp_internaciones_paciente`
 - `sp_comentarios_visitas`
+ - `sp_auditoria_guardias`
 
 Ubicacion: `db_scripts/procedures/`
 

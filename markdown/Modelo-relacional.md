@@ -10,46 +10,6 @@
 - Parise, Thiago  
 - San Pedro, Gianfranco
 
-
-# Diagrama Entidad Relación
-
-***Nota**: Se adjunta el diagrama también como un documento aparte para facilitar su lectura.*  
-
-## Hipotesis
-
-1. El hospital puede dar de alta un paciente sin la necesidad de registrar una internación.  
-2. No es necesario cargar la foto del médico al momento de registrarlo.  
-3. Una habitación no puede cambiar de sector.  
-4. Los números de habitación son únicos en toda el hospital  y no se repiten dentro de cada piso.  
-5. El estado de una habitación tiene valores predefinidos(Libre, Ocupada).  
-6. La orientación de una habitación tiene valores predefinidos (Norte, Sur, Este, Oeste).  
-7. Toda Habitación tiene al menos una Cama (participación total de Habitación en contiene)  
-8. La fecha de finalización de una internación puede ser nula si la internación sigue en curso.  
-9. Un médico puede tener más de una especialidad (cardinalidad N:M).  
-10. Pueden existir especialidades que no sean atendidas por ningún médico.  
-11. Un turno de ronda tiene horarios definidos (ej: Turno 1: 6-12hs, Turno 2: 12-18hs, etc.)  
-12. El médico que hace el recorrido no necesariamente es el médico principal del paciente.  
-13. La fecha de fin de internación puede ser nula si sigue en curso.
-
-## Restricciones
-
-1. Todo médico debe estar registrado también como persona.  
-2. La fecha de inicio de una internación no puede ser posterior a su fecha de fin.  
-3. Un paciente no puede tener dos internaciones activas simultáneamente.  
-4. La fecha y hora de asignación de cama debe estar dentro del período de internación.  
-5. El médico principal debe tener al menos una especialidad asociada con el sector.  
-6. La fecha de un recorrido debe corresponder al día se la semana de la ronda.  
-7. Un médico no puede realizar guardias en días consecutivos.   
-8. No se pueden eliminar médicos que sean médicos principales de internaciones activas.  
-9. No se pueden eliminar habitaciones con camas ocupadas.  
-10. No se puede asignar una cama ya ocupada.  
-11. Un médico no puede estar de guardia si está de vacaciones ese día.  
-12. En una ronda dada no hay habitaciones repetidas.  
-13. Existen 3 turnos de guardia por día por especialidad.  
-14. El turno elegido para una guardia debe ser válido para la especialidad del médico que la realiza.
-
----
-
 # Modelo Relacional
 
 **Nota**: Un atributo en *itálica* significa que es FK. Adoptamos esta notación a modo de simplificar la escritura del MR.
@@ -204,8 +164,14 @@ Turno.idTurno puede no estar en Atiende.idTurno
 
 ---
 
-### Vacaciones()
+### Vacaciones(*matricula*, fechaInicio, fechaFin)  
+CK \= PK \= {(matricula, fechaInicio, fechaFin)}  
+FK \= {matricula}
 
+Vacaciones.matricula debe estar en Medico.matricula  
+Medico.matricula debe estar en Vacaciones.matricula
+
+---
 
 # Formas Normales
 
