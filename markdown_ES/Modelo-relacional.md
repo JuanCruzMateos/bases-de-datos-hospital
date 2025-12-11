@@ -1,14 +1,11 @@
 # **Bases de Datos** | FI UNMdP
+Versión en inglés disponible en [../markdown_EN/Modelo-relacional.md](../markdown_EN/Modelo-relacional.md).
 
 # *Ingeniería en Informática*
 
-**Grupo 4**
-
-- Bonifazi, Paula  
-- Mateos, Juan Cruz  
-- Navarro, Pablo  
-- Parise, Thiago  
-- San Pedro, Gianfranco
+**Proyecto desarrollado por:**
+- **Mateos, Juan Cruz**
+- **San Pedro, Gianfranco**
 
 # Modelo Relacional
 

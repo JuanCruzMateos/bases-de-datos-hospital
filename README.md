@@ -1,12 +1,10 @@
 # Hospital Management System 🏥
+Spanish version available in [README_ES.md](README_ES.md).
 
 **Bases de Datos** | FI UNMdP - Ingeniería en Informática
 
 **Grupo 4:**
-- Bonifazi, Paula
 - Mateos, Juan Cruz
-- Navarro, Pablo
-- Parise, Thiago
 - San Pedro, Gianfranco
 
 ---
@@ -677,10 +675,7 @@ Course: Bases de Datos
 ## 👥 Team
 
 **Grupo 4:**
-- **Bonifazi, Paula**
 - **Mateos, Juan Cruz**
-- **Navarro, Pablo**
-- **Parise, Thiago**
 - **San Pedro, Gianfranco**
 
 *Spring 2025 Semester*

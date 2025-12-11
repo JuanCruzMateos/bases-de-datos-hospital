@@ -1,4 +1,5 @@
 # Hospital Management System - Arquitectura V1
+Versión en inglés disponible en [../markdown_EN/Arquitectura.md](../markdown_EN/Arquitectura.md).
 
 ## ✅ Arquitectura en capas - Manejo manual de transacciones
 
@@ -282,4 +283,3 @@ V2 podra agregar:
 - Pool de conexiones (HikariCP).
 - Utilidad `TransactionManager` para reducir codigo repetido.
 - Pruebas unitarias e integracion.
-

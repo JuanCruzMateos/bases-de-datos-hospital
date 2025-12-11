@@ -1,4 +1,5 @@
 # Transacciones y control de concurrencia
+Versión en inglés disponible en [../markdown_EN/Transacciones.md](../markdown_EN/Transacciones.md).
 
 Este documento detalla como manejamos **transacciones** y **concurrencia** en el modulo de vacaciones y guardias del hospital.
 
@@ -164,4 +165,3 @@ Las transacciones en `VACACIONES` aseguran que el conjunto `(MEDICO, VACACIONES,
 - Los **SAVEPOINTS** permiten revertir solo la operacion actual sin afectar otros cambios de la sesion.
 - La logica de negocio se implementa tanto en scripts SQL como en un **stored procedure** y en un **DAO Java**, manteniendo el mismo comportamiento transaccional.
 - Los **triggers** y **FKs** complementan estas transacciones para garantizar reglas de negocio a nivel de esquema.
-

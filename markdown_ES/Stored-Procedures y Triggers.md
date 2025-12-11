@@ -1,4 +1,5 @@
 # Lógica de altas, bajas y modificaciones  
+Versión en inglés disponible en [../markdown_EN/Stored-Procedures y Triggers.md](../markdown_EN/Stored-Procedures%20y%20Triggers.md).
 ## (Camas, Habitaciones, Sectores e Internaciones)
 
 Este documento resume las decisiones de diseño para manejar **altas, bajas y modificaciones** en el módulo de internaciones del hospital.
@@ -306,4 +307,3 @@ Bloquea el borrado cuando:
   - El médico principal sea distinto del paciente y el CUIL/CUIT contenga el DNI cuando corresponde.
   - Un paciente no tenga dos internaciones activas.
   - El médico principal tenga especialidad en el sector de la habitación asignada (al ubicar o al cambiar médico).
-

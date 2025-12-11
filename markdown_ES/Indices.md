@@ -1,4 +1,5 @@
 # Índices propuestos y relación con los requerimientos
+Versión en inglés disponible en [../markdown_EN/Indices.md](../markdown_EN/Indices.md).
 
 Este documento resume **qué índices creamos/sugerimos** sobre la base de datos del hospital,
 **por qué** los necesitamos y **qué requerimientos funcionales ayudan a cumplir**.

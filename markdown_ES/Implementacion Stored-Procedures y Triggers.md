@@ -1,4 +1,5 @@
 # Implementacion de Stored Procedures - Integracion UI
+Versión en inglés disponible en [../markdown_EN/Implementacion Stored-Procedures y Triggers.md](../markdown_EN/Implementacion%20Stored-Procedures%20y%20Triggers.md).
 
 Este documento describe la implementacion de las pestañas de UI que invocan stored procedures en el Sistema de Gestion Hospitalaria.
 
@@ -483,9 +484,8 @@ Ubicacion: `db_scripts/procedures/`
 
 ## Contribuyentes
 
-**Grupo 4 - FI UNMdP**
-- Bases de Datos
-- Hospital Management System
+- **Mateos, Juan Cruz**
+- **San Pedro, Gianfranco**
 
 ---
 
@@ -498,4 +498,4 @@ Ubicacion: `db_scripts/procedures/`
 
 ## Licencia
 
-(c) 2024 Hospital Database System | Grupo 4 - FI UNMdP
+(c) 2024 Hospital Database System | Proyecto desarrollado por Juan y Gianfranco - FI UNMdP

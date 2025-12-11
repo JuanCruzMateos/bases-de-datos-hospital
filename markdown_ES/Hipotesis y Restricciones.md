@@ -1,5 +1,6 @@
 
 # Hipótesis y restricciones de la implementación
+Versión en inglés disponible en [../markdown_EN/Hipotesis y Restricciones.md](../markdown_EN/Hipotesis%20y%20Restricciones.md).
 
 Este documento resume las **hipótesis de dominio** y las **restricciones / reglas de negocio** efectivamente implementadas en el sistema de gestión del hospital, tanto a nivel de:
 
@@ -137,4 +138,3 @@ En esta sección se detallan las reglas que efectivamente se validan en la aplic
 - Este documento resume las reglas principales que impactan en **altas, bajas y modificaciones** de las entidades más relevantes del sistema (pacientes, médicos, internaciones, habitaciones, camas, guardias, rondas y recorridos).  
 - Para más detalle sobre la implementación técnica de triggers y stored procedures, ver el archivo:  
   `Stored-Procedures y Triggers.md`.
-
