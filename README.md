@@ -163,8 +163,8 @@ The application follows a **strict layered architecture** with clear separation 
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    PRESENTATION LAYER (UI)                      │
-│                     org.hospital.ui.view                        │
+│                     PRESENTATION LAYER (UI)                     │
+│                       org.hospital.ui.view                      │
 │                                                                 │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐           │
 │  │PacientePanel │  │ MedicoPanel  │  │InternacPanel │  ...      │
@@ -172,49 +172,50 @@ The application follows a **strict layered architecture** with clear separation 
 │  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘           │
 │         │                 │                 │                   │
 │  ┌──────▼─────────────────▼─────────────────▼─────────┐         │
-│  │            Controllers (MVC Pattern)               │         │
+│  │             Controllers (MVC Pattern)              │         │
 │  │       feature/*/controller/*Controller.java        │         │
-│  │  • Handle user actions                             │         │
-│  │  • Coordinate between View and Service             │         │
-│  │  • Data transformation (View ↔ Domain)             │         │
+│  │               ? Handle user actions                │         │
+│  │       ? Coordinate between View and Service        │         │
+│  │       ? Data transformation (View ? Domain)        │         │
 │  └──────────────────────────┬─────────────────────────┘         │
 └─────────────────────────────┼───────────────────────────────────┘
                               │
 ┌─────────────────────────────▼───────────────────────────────────┐
-│                       SERVICE LAYER                             │
-│                  feature/*/service/*Service.java                │
+│                          SERVICE LAYER                          │
+│                 feature/*/service/*Service.java                 │
 │                                                                 │
-│  • Business Logic & Validation                                  │
-│  • Cross-entity coordination                                    │
-│  • Transaction orchestration                                    │
-│  • Exception handling and transformation                        │
+│                   Business Logic & Validation                   │
+│                    Cross-entity coordination                    │
+│                    Transaction orchestration                    │
+│              Exception handling and transformation              │
 └─────────────────────────────┼───────────────────────────────────┘
                               │
 ┌─────────────────────────────▼───────────────────────────────────┐
-│                   DATA ACCESS LAYER (DAO)                       │
-│               feature/*/repository/*Dao*.java                   │
+│                     DATA ACCESS LAYER (DAO)                     │
+│                 feature/*/repository/*Dao*.java                 │
 │                                                                 │
-│  • CRUD Operations                                              │
-│  • Manual Transaction Management:                               │
-│    - conn.setAutoCommit(false)                                  │
-│    - execute operations                                         │
-│    - conn.commit() or conn.rollback()                           │
-│  • PreparedStatements (SQL injection prevention)                │
-│  • CallableStatements (Stored Procedures)                       │
+│                         CRUD Operations                         │
+│                  Manual Transaction Management:                 │
+│                   - conn.setAutoCommit(false)                   │
+│                       - execute operations                      │
+│                - conn.commit() or conn.rollback()               │
+│          PreparedStatements (SQL injection prevention)          │
+│              CallableStatements (Stored Procedures)             │
 └─────────────────────────────┼───────────────────────────────────┘
                               │
-                        ┌─────▼──────┐
-                        │    JDBC    │
-                        │DriverMgr   │
-                        │ Connection │
-                        │   Pool     │
-                        └─────┬──────┘
+                         ┌────▼─────┐
+                         │   JDBC   │
+                         │DriverMgr │
+                         │Connection│
+                         │   Pool   │
+                         └────┬─────┘
                               │
 ┌─────────────────────────────▼───────────────────────────────────┐
-│                      ORACLE DATABASE                            │
-│  Tables │ Stored Procedures │ Triggers │ Indexes │ Constraints  │
+│                         ORACLE DATABASE                         │
+│ Tables │ Stored Procedures │ Triggers │ Indexes │ Constraints   │
 └─────────────────────────────────────────────────────────────────┘
 ```
+
 
 ### Package-by-Feature Organization
 

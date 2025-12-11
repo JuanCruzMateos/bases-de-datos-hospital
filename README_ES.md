@@ -162,58 +162,58 @@ docker logs oracle-hospital
 La aplicación sigue una **arquitectura estrictamente en capas** con clara separación de responsabilidades:
 
 ```
-┌────────────────────────────────────────────────────────────────────────────────────────┐
-│                    CAPA DE PRESENTACIÓN (UI)                                           │
-│                     org.hospital.ui.view                                               │
-│                                                                                        │
-│  ┌────────────────┐  ┌────────────────┐  ┌────────────────┐                            │
-│  │PacientePanel   │  │ MedicoPanel    │  │InternacPanel   │  ...                       │
-│  │  (Swing UI)    │  │  (Swing UI)    │  │  (Swing UI)    │                            │
-│  └───────┬────────┘  └───────┬────────┘  └───────┬────────┘                            │
-│         │                   │                   │                                      │
-│  ┌──────▼───────────▼───────▼───────────┐                                            │
-│  │            Controladores (patrón MVC)             │                               │
-│  │       feature/*/controller/*Controller.java       │                               │
-│  │  • Manejar acciones de usuario                    │                               │
-│  │  • Coordinar entre Vista y Servicio               │                               │
-│  │  • Transformación de datos (Vista ↔ Dominio)      │                               │
-│  └─────────────────────────────────────────┬────────┘                               │
-└────────────────────────────────────────────┴────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                    CAPA DE PRESENTACIÓN (UI)                    │
+│                     org.hospital.ui.view                        │
+│                                                                 │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐           │
+│  │PacientePanel │  │ MedicoPanel  │  │InternacPanel │  ...      │
+│  │  (Swing UI)  │  │  (Swing UI)  │  │  (Swing UI)  │           │
+│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘           │
+│         │                 │                 │                   │
+│  ┌──────▼─────────────────▼─────────────────▼─────────┐         │
+│  │          Controladores (patrón MVC)                │         │
+│  │     feature/*/controller/*Controller.java          │         │
+│  │  • Manejar acciones de usuario                     │         │
+│  │  • Coordinar entre Vista y Servicio                │         │
+│  │  • Transformación de datos (Vista ↔ Dominio)       │         │
+│  └──────────────────────────┬─────────────────────────┘         │
+└─────────────────────────────┼───────────────────────────────────┘
                               │
-┌───────────────────────────────────────────────────────────────────────┐
-│                       CAPA DE SERVICIO                                │
-│                  feature/*/service/*Service.java                      │
-│                                                                       │
-│  • Lógica de negocio y validación                                     │
-│  • Coordinación entre entidades                                       │
-│  • Orquestación de transacciones                                      │
-│  • Manejo y transformación de excepciones                             │
-└────────────────────────────────────────────┴──────────────────────────┘
+┌─────────────────────────────▼───────────────────────────────────┐
+│                       CAPA DE SERVICIO                          │
+│                 feature/*/service/*Service.java                 │
+│                                                                 │
+│  • Lógica de negocio y validación                               │
+│  • Coordinación entre entidades                                 │
+│  • Orquestación de transacciones                                │
+│  • Manejo y transformación de excepciones                       │
+└─────────────────────────────┼───────────────────────────────────┘
                               │
-┌───────────────────────────────────────────────────────────────────────┐
-│                   CAPA DE ACCESO A DATOS (DAO)                        │
-│               feature/*/repository/*Dao*.java                         │
-│                                                                       │
-│  • Operaciones CRUD                                                   │
-│  • Gestión manual de transacciones:                                   │
-│    - conn.setAutoCommit(false)                                        │
-│    - execute operations                                               │
-│    - conn.commit() or conn.rollback()                                 │
-│  • PreparedStatements (prevención de SQL injection)                   │
-│  • CallableStatements (Stored Procedures)                             │
-└────────────────────────────────────────────┴──────────────────────────┘
+┌─────────────────────────────▼───────────────────────────────────┐
+│                CAPA DE ACCESO A DATOS (DAO)                     │
+│              feature/*/repository/*Dao*.java                    │
+│                                                                 │
+│  • Operaciones CRUD                                             │
+│  • Gestión manual de transacciones:                             │
+│    - conn.setAutoCommit(false)                                  │
+│    - execute operations                                         │
+│    - conn.commit() or conn.rollback()                           │
+│  • PreparedStatements (prevención de SQL injection)             │
+│  • CallableStatements (Stored Procedures)                       │
+└─────────────────────────────┼───────────────────────────────────┘
                               │
-                        ┌─────▼─────┐
-                        │    JDBC    │
-                        │DriverMgr   │
-                        │ Connection │
-                        │   Pool     │
-                        └─────┬─────┘
+                         ┌────▼─────┐
+                         │   JDBC   │
+                         │DriverMgr │
+                         │Connection│
+                         │   Pool   │
+                         └────┬─────┘
                               │
-┌───────────────────────────────────────────────────────────────────────┐
-│                      ORACLE DATABASE                                  │
-│  Tables │ Stored Procedures │ Triggers │ Indexes │ Constraints         │
-└───────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────▼───────────────────────────────────┐
+│                     ORACLE DATABASE                             │
+│ Tables │ Stored Procedures │ Triggers │ Indexes │ Constraints   │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ### Organización Package-by-Feature
