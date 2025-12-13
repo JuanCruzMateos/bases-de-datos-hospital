@@ -1,14 +1,22 @@
 # Sistema de Gestión Hospitalaria 🏥
 Versión en inglés disponible en [README.md](README.md).
 
-**Bases de Datos** | FI UNMdP - Ingeniería en Informática
-
-**Grupo 4:**
-- Mateos, Juan Cruz
-- San Pedro, Gianfranco
-
 ---
 
+## Indice
+- [Descripción del Proyecto](#descripcion-del-proyecto)
+- [Inicio Rápido](#inicio-rapido)
+- [Base de Datos](#base-de-datos)
+- [Arquitectura](#arquitectura)
+- [Estructura del Proyecto](#estructura-del-proyecto)
+- [Documentación](#documentacion)
+- [Desarrollo](#desarrollo)
+- [Recursos Adicionales](#recursos-adicionales)
+- [Objetivos del Proyecto y Resultados de Aprendizaje](#objetivos-del-proyecto-y-resultados-de-aprendizaje)
+- [Licencia](#licencia)
+- [Equipo](#equipo)
+
+<a id="descripcion-del-proyecto"></a>
 ## 📋 Descripción del Proyecto
 
 Sistema de Gestión Hospitalaria de nivel empresarial construido con **Oracle Database** y **Java Swing**. Ofrece gestión integral de pacientes, médicos e internaciones con capacidades avanzadas de reportes mediante stored procedures.
@@ -48,6 +56,7 @@ Sistema de Gestión Hospitalaria de nivel empresarial construido con **Oracle Da
 
 ---
 
+<a id="inicio-rapido"></a>
 ## 🚀 Inicio Rápido
 
 ### Requisitos Previos
@@ -86,6 +95,7 @@ La inicialización de la base de datos incluye:
 
 ---
 
+<a id="base-de-datos"></a>
 ## 🗄️ Base de Datos
 
 ### Modelo Entidad-Relación
@@ -155,6 +165,7 @@ docker logs oracle-hospital
 
 ---
 
+<a id="arquitectura"></a>
 ## 🏛️ Arquitectura
 
 ### Patrón de Arquitectura en Capas
@@ -231,6 +242,7 @@ feature/{feature_name}/
 
 ---
 
+<a id="estructura-del-proyecto"></a>
 ## 📁 Estructura del Proyecto
 
 Organización completa del proyecto con arquitectura **Package-by-Feature**:
@@ -376,19 +388,14 @@ hospital/
 │   │   └── call_sp_vacaciones.sql
 │   └── useful.sql                    # Consultas utilitarias
 │
-├── 📝 markdown/                      # Documentación técnica
-│   ├── ARCHITECTURE.md               # Guía completa de arquitectura
-│   ├── Hipotesis y Restricciones.md  # Reglas de negocio y restricciones
-│   ├── Implementacion Stored-Procedures y Triggers.md
-│   ├── Stored-Procedures y Triggers.md
-│   └── Indices.md                    # Estrategia de índices
-│
+├── 📝 markdown_ES/                   # Documentacion tecnica (ES)
+│   └── Modelo-relacional.md         # Diagrama ER y diseño de base
+├── 📝 markdown_EN/                   # Technical documentation (EN)
 ├── compose.yml                       # Docker Compose para Oracle DB
 ├── pom.xml                           # Dependencias Maven (Java 8)
 ├── launch-ui.sh                      # Script de lanzamiento rápido
-├── modelo-relacional.md              # Diagrama ER y diseño de base
 ├── oracle.md                         # Notas de configuración Oracle
-└── README.md                         # Este archivo
+└── README_ES.md                      # Este archivo
 ```
 
 **Decisiones Arquitectónicas Clave:**
@@ -401,19 +408,20 @@ hospital/
 
 ---
 
+<a id="documentacion"></a>
 ## 📚 Documentación
 
 ### Recursos para Desarrolladores
 
 **Arquitectura y Diseño:**
-- [ARCHITECTURE.md](markdown/ARCHITECTURE.md) - Documentación completa de la arquitectura del sistema
-- [modelo-relacional.md](modelo-relacional.md) - Modelo Entidad-Relación, hipótesis y restricciones de negocio
-- [Hipotesis y Restricciones.md](markdown/Hipotesis%20y%20Restricciones.md) - Reglas de negocio detalladas
+- [Arquitectura.md](markdown_ES/Arquitectura.md) - Documentación completa de la arquitectura del sistema
+- [Modelo-relacional.md](markdown_ES/Modelo-relacional.md) - Modelo Entidad-Relación, hipótesis y restricciones de negocio
+- [Hipotesis y Restricciones.md](markdown_ES/Hipotesis%20y%20Restricciones.md) - Reglas de negocio detalladas
 
 **Implementación de Base de Datos:**
-- [Stored-Procedures y Triggers.md](markdown/Stored-Procedures%20y%20Triggers.md) - Especificaciones de SP
-- [Implementacion Stored-Procedures y Triggers.md](markdown/Implementacion%20Stored-Procedures%20y%20Triggers.md) - Detalles de implementación
-- [Indices.md](markdown/Indices.md) - Estrategia de índices y optimización de performance
+- [Stored-Procedures y Triggers.md](markdown_ES/Stored-Procedures%20y%20Triggers.md) - Especificaciones de SP
+- [Implementacion Stored-Procedures y Triggers.md](markdown_ES/Implementacion%20Stored-Procedures%20y%20Triggers.md) - Detalles de implementación
+- [Indices.md](markdown_ES/Indices.md) - Estrategia de índices y optimización de performance
 
 **Scripts de Base de Datos:**
 - `db_scripts/init/` - Scripts de inicialización de base (auto-ejecutados por Docker)
@@ -479,6 +487,7 @@ Logging centralizado vía `LoggerConfig.java`:
 
 ---
 
+<a id="desarrollo"></a>
 ## 🛠️ Desarrollo
 
 ### Compilar el Proyecto
@@ -603,6 +612,7 @@ Al agregar nuevas funcionalidades, sigue el patrón establecido:
 - Revisar excepciones en la salida de consola
 - Asegurar que la base esté accesible antes de iniciar la UI
 
+<a id="recursos-adicionales"></a>
 ## 📖 Recursos Adicionales
 
 ### Oracle Database
@@ -620,10 +630,11 @@ Al agregar nuevas funcionalidades, sigue el patrón establecido:
 
 ### Documentación del Proyecto
 
-Todas las especificaciones y documentos de diseño detallados están disponibles en la carpeta `markdown/`.
+Todas las especificaciones y documentos de diseño detallados están disponibles en las carpetas `markdown_ES/` (Español) y `markdown_EN/` (Inglés).
 
 ---
 
+<a id="objetivos-del-proyecto-y-resultados-de-aprendizaje"></a>
 ## 🎯 Objetivos del Proyecto y Resultados de Aprendizaje
 
 Este proyecto demuestra:
@@ -664,6 +675,7 @@ Este proyecto demuestra:
 
 ---
 
+<a id="licencia"></a>
 ## 📄 Licencia
 
 **Proyecto Académico** - Universidad Nacional de Mar del Plata  
@@ -672,6 +684,7 @@ Curso: Bases de Datos
 
 ---
 
+<a id="equipo"></a>
 ## 👥 Equipo
 
 **Grupo 4:**

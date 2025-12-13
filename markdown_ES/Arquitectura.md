@@ -258,7 +258,7 @@ Ambos construyen un bloque PL/SQL que:
 - Inserta o actualiza en `VACACIONES`.
 - En excepcion hace `ROLLBACK TO inicio_transaccion;` y propaga el error.
 
-Mas detalles en `markdown/Transacciones.md`.
+Mas detalles en [Transacciones.md](Transacciones.md).
 
 ---
 

@@ -256,7 +256,7 @@ Both build a PL/SQL block that:
 - Inserts or updates in `VACACIONES`.
 - On exception does `ROLLBACK TO inicio_transaccion;` and propagates the error.
 
-More details in `markdown/Transacciones.md`.
+More details in [Transacciones.md](Transacciones.md).
 
 ---
 
@@ -281,4 +281,3 @@ V2 could add:
 - Connection pool (HikariCP).
 - `TransactionManager` utility to reduce repetitive code.
 - Unit and integration tests.
-

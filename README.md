@@ -1,14 +1,22 @@
 # Hospital Management System 🏥
 Spanish version available in [README_ES.md](README_ES.md).
 
-**Bases de Datos** | FI UNMdP - Ingeniería en Informática
-
-**Grupo 4:**
-- Mateos, Juan Cruz
-- San Pedro, Gianfranco
-
 ---
 
+## Table of Contents
+- [Project Overview](#project-overview)
+- [Quick Start](#quick-start)
+- [Database](#database)
+- [Architecture](#architecture)
+- [Project Structure](#project-structure)
+- [Documentation](#documentation)
+- [Development](#development)
+- [Additional Resources](#additional-resources)
+- [Project Goals & Learning Outcomes](#project-goals--learning-outcomes)
+- [License](#license)
+- [Team](#team)
+
+<a id="project-overview"></a>
 ## 📋 Project Overview
 
 Enterprise-grade **Hospital Management System** built with **Oracle Database** and **Java Swing**. Features comprehensive patient, doctor, and internment management with advanced reporting capabilities through stored procedures.
@@ -48,6 +56,7 @@ Enterprise-grade **Hospital Management System** built with **Oracle Database** a
 
 ---
 
+<a id="quick-start"></a>
 ## 🚀 Quick Start
 
 ### Prerequisites
@@ -86,6 +95,7 @@ The database initialization includes:
 
 ---
 
+<a id="database"></a>
 ## 🗄️ Database
 
 ### Entity-Relationship Model
@@ -155,6 +165,7 @@ docker logs oracle-hospital
 
 ---
 
+<a id="architecture"></a>
 ## 🏛️ Architecture
 
 ### Layered Architecture Pattern
@@ -232,6 +243,7 @@ feature/{feature_name}/
 
 ---
 
+<a id="project-structure"></a>
 ## 📁 Project Structure
 
 Complete project organization with **Package-by-Feature** architecture:
@@ -377,17 +389,12 @@ hospital/
 │   │   └── call_sp_vacaciones.sql
 │   └── useful.sql                    # Utility queries
 │
-├── 📝 markdown/                      # Technical documentation
-│   ├── ARCHITECTURE.md               # Complete architecture guide
-│   ├── Hipotesis y Restricciones.md  # Business rules & constraints
-│   ├── Implementacion Stored-Procedures y Triggers.md
-│   ├── Stored-Procedures y Triggers.md
-│   └── Indices.md                    # Index strategy
-│
+├── 📝 markdown_EN/                   # Technical documentation (EN)
+│   └── Modelo-relacional.md         # ER diagram & database design
+├── 📝 markdown_ES/                   # Documentacion tecnica (ES)
 ├── compose.yml                       # Docker Compose for Oracle DB
 ├── pom.xml                           # Maven dependencies (Java 8)
 ├── launch-ui.sh                      # Quick launch script
-├── modelo-relacional.md              # ER diagram & database design
 ├── oracle.md                         # Oracle setup notes
 └── README.md                         # This file
 ```
@@ -402,19 +409,20 @@ hospital/
 
 ---
 
+<a id="documentation"></a>
 ## 📚 Documentation
 
 ### Developer Resources
 
 **Architecture & Design:**
-- [ARCHITECTURE.md](markdown/ARCHITECTURE.md) - Complete system architecture documentation
-- [modelo-relacional.md](modelo-relacional.md) - Entity-Relationship model, hypothesis, and business constraints
-- [Hipotesis y Restricciones.md](markdown/Hipotesis%20y%20Restricciones.md) - Detailed business rules
+- [Arquitectura.md](markdown_EN/Arquitectura.md) - Complete system architecture documentation
+- [Modelo-relacional.md](markdown_EN/Modelo-relacional.md) - Entity-Relationship model, hypothesis, and business constraints
+- [Hipotesis y Restricciones.md](markdown_EN/Hipotesis%20y%20Restricciones.md) - Detailed business rules
 
 **Database Implementation:**
-- [Stored-Procedures y Triggers.md](markdown/Stored-Procedures%20y%20Triggers.md) - SP specifications
-- [Implementacion Stored-Procedures y Triggers.md](markdown/Implementacion%20Stored-Procedures%20y%20Triggers.md) - Implementation details
-- [Indices.md](markdown/Indices.md) - Index strategy and performance optimization
+- [Stored-Procedures y Triggers.md](markdown_EN/Stored-Procedures%20y%20Triggers.md) - SP specifications
+- [Implementacion Stored-Procedures y Triggers.md](markdown_EN/Implementacion%20Stored-Procedures%20y%20Triggers.md) - Implementation details
+- [Indices.md](markdown_EN/Indices.md) - Index strategy and performance optimization
 
 **Database Scripts:**
 - `db_scripts/init/` - Database initialization scripts (auto-run by Docker)
@@ -480,6 +488,7 @@ Centralized logging via `LoggerConfig.java`:
 
 ---
 
+<a id="development"></a>
 ## 🛠️ Development
 
 ### Building the Project
@@ -604,6 +613,7 @@ When adding new features, follow the established pattern:
 - Check for exceptions in console output
 - Ensure database is accessible before starting UI
 
+<a id="additional-resources"></a>
 ## 📖 Additional Resources
 
 ### Oracle Database
@@ -621,10 +631,11 @@ When adding new features, follow the established pattern:
 
 ### Project Documentation
 
-All detailed specifications and design documents are available in the `markdown/` folder.
+All detailed specifications and design documents are available in the `markdown_EN/` (English) and `markdown_ES/` (Spanish) folders.
 
 ---
 
+<a id="project-goals--learning-outcomes"></a>
 ## 🎯 Project Goals & Learning Outcomes
 
 This project demonstrates:
@@ -665,6 +676,7 @@ This project demonstrates:
 
 ---
 
+<a id="license"></a>
 ## 📄 License
 
 **Academic Project** - Universidad Nacional de Mar del Plata  
@@ -673,6 +685,7 @@ Course: Bases de Datos
 
 ---
 
+<a id="team"></a>
 ## 👥 Team
 
 **Grupo 4:**
